@@ -10,8 +10,8 @@ def parse():
 	
 	n = readint()
 	m = readint()
-	vertices = [readstr() for _ in range n]
-	edges = [readints() for _ in range m]
+	vertices = [readstr() for _ in range(n)]
+	edges = [readints() for _ in range(m)]
 
 	return Multigraph(n, m, vertices, edges)
 
@@ -19,7 +19,7 @@ def parse():
 
 class Multigraph:
 
-	def __init__(n, m, vertices, edges):
+	def __init__(self, n, m, vertices, edges):
 		
 		self.n = n # number of vertices
 		self.m = m # number of edges
@@ -70,3 +70,4 @@ def main():
 	type2 = g.latest_departure(x, y, interval)
 	type3 = g.fastest(x, y, interval)
 	type4 = g.shortest(x, y, interval)
+
