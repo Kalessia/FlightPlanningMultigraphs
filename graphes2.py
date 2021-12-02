@@ -50,11 +50,9 @@ def acquisitionMultigraphe(nomFichier):
 	return Multigraph(n, m, vertices, edges)
 
 
-
-
-def transformationMultigraphe(multiG, verbose = False):
+def transformationMultigrapheListeAdjacence(multiG, verbose = False):
 	"""
-	Méthode permettant de transformer un multigraphe G pondéré par le temps en un graphe G' classique
+	Méthode permettant de transformer un multigraphe G pondéré par le temps en un graphe G' classique (modelisation : liste d'adjacence)
 
 	multiG : multigraphe pondéré par le temps, structure Multigraph
 	verbose : mettre à True pour visualiser le détail du déroulement de cet algorithme
@@ -76,9 +74,73 @@ def transformationMultigraphe(multiG, verbose = False):
 
 	# ensV = union des ensembles vIN et vOUT
 	ensV = vIN + vOUT
-	# print("TEST env original ", ensV)
 	ensV.sort(key = operator.itemgetter(0, 1), reverse=False)
-	# print("TEST ensV sorted =" , ensV)
+
+	# Construction de la liste d'adjacence listeAdj[key=source][val=destination, poids] (dictionnaire) du graphe G issu du multigraphe multiG
+	ensE = []
+	listeAdj = {}
+	# Ajout des arcs du sommet source au sommet destination de poids 0
+	ensV_copy = copy.deepcopy(ensV)
+	prec = None
+	while (len(ensV_copy) > 0):
+		sommetEnsV = ensV_copy.pop(0)
+		if (prec != None and prec[0] == sommetEnsV[0]) :
+			ensE.append((prec,sommetEnsV, 0))
+			if prec in listeAdj.keys():
+				listeAdj[prec].append((sommetEnsV, 0))
+			else :	
+				listeAdj[prec] = [(sommetEnsV, 0)]
+
+			if verbose :
+				print("Ajout d'un arc de poids 0 entre ", prec, "et", sommetEnsV)
+
+		prec = sommetEnsV
+
+	# Ajout des arcs du sommet source au sommet destination de poids lambda
+	for arc in multiG.edges :
+		x = arc.split("(")[1].split(")")[0].split(",")
+		source = (x[0], int(x[2]))
+		dest = (x[1], int(x[2])+int(x[3]))
+		ensE.append((source,dest,int(x[3])))
+		if source in listeAdj.keys():
+			listeAdj[source].append((dest, int(x[3])))
+		else :	
+			listeAdj[source] = [(dest, int(x[3]))]
+
+		if verbose :
+			print("Ajout d'un arc de poids lambda entre ", source, "et", dest)
+
+	if verbose :
+		print("\nListe d'adjacence :", listeAdj)
+
+	return listeAdj
+
+
+def transformationMultigrapheMatAdjacence(multiG, verbose = False):
+	"""
+	Méthode permettant de transformer un multigraphe G pondéré par le temps en un graphe G' classique (modelisation : matrice d'adjacence)
+
+	multiG : multigraphe pondéré par le temps, structure Multigraph
+	verbose : mettre à True pour visualiser le détail du déroulement de cet algorithme
+	"""
+	vIN = []
+	vOUT = []
+	for arc in multiG.edges :
+		x = arc.split("(")[1].split(")")[0].split(",")
+
+		# vIN(sommet multiGraphe) = liste de doublets (v, t) avec v = sommet multiGraphe et t = poids (date) de l'arc entrant de v + lambda
+		newSommet = (x[1], int(x[2])+int(x[3]))
+		if newSommet not in vIN:
+			vIN.append(newSommet)
+
+		# vOUT(sommet multiGraphe) = liste de doublets (v, t) avec v = sommet multiGraphe et t = poids (date) de l'arc sortant de v
+		newSommet = (x[0], int(x[2]))
+		if newSommet not in vOUT:
+			vOUT.append(newSommet)
+
+	# ensV = union des ensembles vIN et vOUT
+	ensV = vIN + vOUT
+	ensV.sort(key = operator.itemgetter(0, 1), reverse=False)
 
 	# Construction de la matrice d'adjacence matG[source][destination] du graphe G issu du multigraphe multiG
 	# Initialisation de toutes les cases à -1 qui signifie "aucun arc entre les sommets"
@@ -94,13 +156,12 @@ def transformationMultigraphe(multiG, verbose = False):
 			indexSource = ensV.index(prec)
 			indexDest = ensV.index(sommetEnsV)
 			matG[indexSource][indexDest] = 0
-			ensE.append(prec,sommetEnsV)
+			ensE.append((prec,sommetEnsV, 0))
 
 			if verbose :
 				print("Ajout d'un arc de poids 0 entre ", prec, "et", sommetEnsV)
 
 		prec = sommetEnsV
-
 
 	# Ajout des arcs du sommet source au sommet destination de poids lambda
 	for arc in multiG.edges :
@@ -108,13 +169,15 @@ def transformationMultigraphe(multiG, verbose = False):
 		source = (x[0], int(x[2]))
 		dest = (x[1], int(x[2])+int(x[3]))
 		matG[ensV.index(source)][ensV.index(dest)] = int(x[3])
-		ensE.append(source,dest)
+		ensE.append((source,dest,int(x[3])))
 
 		if verbose :
 			print("Ajout d'un arc de poids lambda entre ", source, "et", dest)
 
 	if verbose :
 		affichageMatG(matG, ensV)
+		print("\nListe des sommets :", ensV)
+		print("\nListe des arcs :", ensE)
 
 	return ensV, ensE, matG
 
@@ -127,8 +190,6 @@ def affichageMatG(matG, ensV):
 	print(df, "\n")
 
 
-def existeChemin(indiceSourceX, indiceDestY, matG):
-	return
 
 
 def earliest_arrival(x, y, matG, ensV, verbose = False):
@@ -225,6 +286,35 @@ def shortest(x, y, matG, verbose):
 	return path
 
 
+# PAS ENCORE FONCTIONNANTE
+# def pcch_BFS(x, y, lAdj):
+# 	"""
+# 	"""
+# 	tmp = {}
+
+# 	f = [x]	# Initialisation de la file avec le sommet source x
+# 	sommetsVisites = [x] # Initialisation de la liste de sommets dejà visités avec le sommet source x
+# 	tmp[x] = None
+
+# 	while (len(f) != 0):
+# 		sommetATraiter = f.pop(0)
+# 		if sommetATraiter in lAdj.keys():
+# 			for successeur, l in lAdj[sommetATraiter]:
+# 				print(successeur)
+# 				if successeur not in sommetsVisites:
+# 					sommetsVisites.append(successeur)
+# 					f.append(successeur)
+# 					print("f", f)
+# 					tmp[(successeur,l)] = sommetATraiter
+
+# 	fils = y
+# 	path = [y]
+# 	while (fils != None):
+# 		pere = tmp[fils]
+# 		path.append(pere)
+# 		fils = pere
+
+# 	return path.reverse()
 
 
 
@@ -238,5 +328,12 @@ g = acquisitionMultigraphe("multigrapheG1.txt")
 
 if g != None :
 	g.afficheMultigraphe()
+print("------------------------------------------------------------------")
 
-transformationMultigraphe(g, True)
+transformationMultigrapheMatAdjacence(g, verbose = True)
+print("------------------------------------------------------------------")
+
+listeAdj = transformationMultigrapheListeAdjacence(g, verbose = True)
+print("------------------------------------------------------------------")
+
+print(pcch_BFS(('a',1), ('g',8), listeAdj))
