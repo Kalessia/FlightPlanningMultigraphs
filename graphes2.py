@@ -79,17 +79,16 @@ def transformationMultigrapheListeAdjacence(multiG, verbose = False):
 	# Construction de la liste d'adjacence listeAdj[key=source][val=destination, poids] (dictionnaire) du graphe G issu du multigraphe multiG
 	ensE = []
 	listeAdj = {}
+
 	# Ajout des arcs du sommet source au sommet destination de poids 0
 	ensV_copy = copy.deepcopy(ensV)
 	prec = None
 	while (len(ensV_copy) > 0):
 		sommetEnsV = ensV_copy.pop(0)
+		listeAdj[sommetEnsV] = []
 		if (prec != None and prec[0] == sommetEnsV[0]) :
 			ensE.append((prec,sommetEnsV, 0))
-			if prec in listeAdj.keys():
-				listeAdj[prec].append((sommetEnsV, 0))
-			else :	
-				listeAdj[prec] = [(sommetEnsV, 0)]
+			listeAdj[prec].append((sommetEnsV, 0))
 
 			if verbose :
 				print("Ajout d'un arc de poids 0 entre ", prec, "et", sommetEnsV)
@@ -102,10 +101,7 @@ def transformationMultigrapheListeAdjacence(multiG, verbose = False):
 		source = (x[0], int(x[2]))
 		dest = (x[1], int(x[2])+int(x[3]))
 		ensE.append((source,dest,int(x[3])))
-		if source in listeAdj.keys():
-			listeAdj[source].append((dest, int(x[3])))
-		else :	
-			listeAdj[source] = [(dest, int(x[3]))]
+		listeAdj[source].append((dest, int(x[3])))
 
 		if verbose :
 			print("Ajout d'un arc de poids lambda entre ", source, "et", dest)
@@ -192,12 +188,11 @@ def affichageMatG(matG, ensV):
 
 
 
-def earliest_arrival(x, y, matG, ensV, verbose = False):
+def earliest_arrival(x, y, lAdj, verbose = False):
 	"""
 	Returns the path from x to y which arrives the earliest.
 
-	matG : graphe G’=(V,E) traduisant un multigraphe pondéré par le temps
-	ensV : liste de sommets de G' (doublets)
+	lAdj : graphe G’=(V,E) traduisant un multigraphe pondéré par le temps
 	x : sommet source dans le multigraphe pondéré par le temps
 	y : sommet destination dans le multigraphe pondéré par le temps
 	"""
@@ -205,11 +200,16 @@ def earliest_arrival(x, y, matG, ensV, verbose = False):
 	# Instanciation d'une liste listeY avec les noeuds contenant y dans leur étiquette classés par ordre de t croissant
 	listeY = []
 	listeX = []
+	ensV = list(listeAdj.keys())
+	print(ensV)
 	for sommet in ensV:
-		if sommet[1] == y :
+		print(sommet[0], y)
+		if sommet[0] == y :
 			listeY.append(sommet)
+			print("Y", listeY)
 		if sommet[0] == x :
-			listeX.append(ensV.index(sommet))
+			listeX.append(sommet)
+			print("X", listeX)
 
 	listeY.sort(key = operator.itemgetter(1), reverse=False)
 
@@ -217,12 +217,12 @@ def earliest_arrival(x, y, matG, ensV, verbose = False):
 		print("listeY = liste des noeuds contenant y dans leur étiquette triée par t croissant:", listeY)
 		print("listeX = liste des noeuds contenant x dans leur étiquette :", listeX)
 
-	# pour chaque sommet dans la liste l, vérifier s' il existe un chemin de x à y en remontant le sens des arcs de G’.
+	# Pour chaque sommet dans la liste l, vérifier s' il existe un chemin de x à y en remontant le sens des arcs de G’.
 	# Pendant cette recherche, les noeuds rejoint par un arc de poids = 0 ne sont pas retenus dans la solution
 	# L’algorithme s'arrête au premier chemin de x à y trouvé
 	for s1 in listeY:
 		for s2 in listeX :
-			path = existeChemin(s2, [ensV.index(s1)], matG)
+			path = pcch_BFS(s2, s1, lAdj, verbose)
 			if path != None :
 
 				if verbose:
@@ -286,35 +286,44 @@ def shortest(x, y, matG, verbose):
 	return path
 
 
-# PAS ENCORE FONCTIONNANTE
-# def pcch_BFS(x, y, lAdj):
-# 	"""
-# 	"""
-# 	tmp = {}
+def pcch_BFS(x, y, lAdj, verbose = False):
+	"""
+	"""
+	traceback = {} # Dictionnaire clé = successeur du pere (fils) : value = pere
+	f = [x]	# Initialisation de la file avec le sommet source x
+	sommetsVisites = [x] # Initialisation de la liste de sommets dejà visités avec le sommet source x
+	traceback[x] = None
 
-# 	f = [x]	# Initialisation de la file avec le sommet source x
-# 	sommetsVisites = [x] # Initialisation de la liste de sommets dejà visités avec le sommet source x
-# 	tmp[x] = None
+	while (len(f) > 0):
+		print("\nNouvelle ite - etat file :", f)
+		sommetATraiter = f.pop(0)
+		print("Sommet à traiter :", sommetATraiter)
+		if sommetATraiter in lAdj.keys():
+			for successeur, _ in lAdj[sommetATraiter]:
+				print("\tSuccesseur :", successeur)
+				if successeur not in sommetsVisites:
+					sommetsVisites.append(successeur)
+					print("Sommets visites =", sommetsVisites)
+					f.append(successeur)
+					traceback[(successeur)] = sommetATraiter
 
-# 	while (len(f) != 0):
-# 		sommetATraiter = f.pop(0)
-# 		if sommetATraiter in lAdj.keys():
-# 			for successeur, l in lAdj[sommetATraiter]:
-# 				print(successeur)
-# 				if successeur not in sommetsVisites:
-# 					sommetsVisites.append(successeur)
-# 					f.append(successeur)
-# 					print("f", f)
-# 					tmp[(successeur,l)] = sommetATraiter
+	if len(sommetsVisites) != len(lAdj):
+		return "Erreur algorithme pcch_BFS"
 
-# 	fils = y
-# 	path = [y]
-# 	while (fils != None):
-# 		pere = tmp[fils]
-# 		path.append(pere)
-# 		fils = pere
+	fils = y
+	pere = traceback[y]
+	path = [y]
+	while (pere != None):
+		path.append(pere)
+		fils = pere
+		pere = traceback[fils]
+	
+	path.reverse()
 
-# 	return path.reverse()
+	if verbose:
+		print("\nRésultat pcch_BFS(x =", x, ", y =", y, ", lAdj) :", path)
+
+	return path
 
 
 
@@ -330,10 +339,11 @@ if g != None :
 	g.afficheMultigraphe()
 print("------------------------------------------------------------------")
 
-transformationMultigrapheMatAdjacence(g, verbose = True)
+transformationMultigrapheMatAdjacence(g, verbose = False)
 print("------------------------------------------------------------------")
 
-listeAdj = transformationMultigrapheListeAdjacence(g, verbose = True)
+listeAdj = transformationMultigrapheListeAdjacence(g, verbose = False)
 print("------------------------------------------------------------------")
 
-print(pcch_BFS(('a',1), ('g',8), listeAdj))
+#pcch_BFS(('a',1), ('g',8), listeAdj, True)
+earliest_arrival('a', 'g', listeAdj, verbose = True)
