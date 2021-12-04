@@ -45,19 +45,9 @@
 
 #####################################################################################################################
 
-- Penser à ajouter un affichage du graphe ou multigraphe dans chaque classe, du genre:
-
-	def afficheMultigraphe(self):
-		print("\nMultigraph de " + str(self.n) + " sommets et " + str(self.m) + " arcs :")
-		print("\tListe de sommets : " + str(self.vertices) )
-		print("\tListe d'arcs : " + str(self.edges) + "\n" )
-
-#####################################################################################################################
-
 - Prevoir si le choix du VERBOSE doit etre determinée au clavier par l'utilisateur (print "Afficher détails sur le deroulement des algos?")
 ou sinon si on va le preciser à la main dans le programme.
 En tout cas faire en sorte que la valeur du VERBOSE soit rentré une seule fois et se transmet à toutes les fonctions automatiquement.
-
 
 #####################################################################################################################
 

@@ -39,25 +39,25 @@ class MinimalDistanceProblem():
 		self.interval = interval # closed interval
 		self.visited_tree = g.BFS(x, y, interval) # contains best predecessors
 
-	def traceback(self, x_list, specific_y, verbose=False):
+	def traceback(self, x_list, specific_y, visited_tree, backwards=False, verbose=False):
 		"""
+		Static method.
 		Uses visited_tree to find the shortest path between specific_x and specific_y.
 		specific_x: (original_vertex_label, time)
 		specific_y: (original_vertex_label, time)
 		"""
 
-		print("test traceback : sX, sY", x_list, specific_y)
 		# if specific_x == None or specific_y == None:
 		# 	return []
 		
-		# if specific_x not in self.visited_tree.keys() or specific_y not in self.visited_tree.keys():
-		# 	return []
+		if specific_y not in visited_tree.keys():
+		 	return []
 
-		if not(bool(self.visited_tree)):
+		if not(bool(visited_tree)):
 			return []
 
 		child = specific_y
-		parent = self.visited_tree[child]
+		parent = visited_tree[child]
 		path = [specific_y]
 
 		while (parent != None):
@@ -66,14 +66,14 @@ class MinimalDistanceProblem():
 			if parent in x_list: 
 				break
 
-			print ("test : parent, child, path :", parent, child, path)
 			child = parent
-			parent = self.visited_tree[child]
+			parent = visited_tree[child]
 		
 		if parent == None:
 			return []
 
-		path.reverse()
+		if not(backwards):
+			path.reverse()
 
 		if verbose:
 			print("\nRésultat traceback(x =", specific_x, ", y =", specific_y, ") :", path)
@@ -92,16 +92,15 @@ class MinimalDistanceProblem():
 		x_list = self.g.vertices[self.x]
 		y_list = self.g.vertices[self.y]
 
-		if verbose :
+		if verbose:
 			print("Liste des noeuds contenant y dans leur étiquette triée par t croissant:", y_list)
 			print("Liste des noeuds contenant x dans leur étiquette :", x_list)
 
 		# Pour chaque sommet dans la liste y_list, vérifier s' il existe un chemin de x à y en remontant le sens des arcs de G’.
 		# L’algorithme s'arrête au premier chemin de x à y trouvé
-		print(y_list)
+
 		for specific_y in y_list:
-			print("Trying specific_y:",specific_y)
-			path = self.traceback(x_list, specific_y) # specific_y est le sommet contenant y dans l'etiquette pas encore testé avec t minimale
+			path = self.traceback(x_list, specific_y, self.visited_tree) # specific_y est le sommet contenant y dans l'etiquette pas encore testé avec t minimale
 			if path != None:
 				if verbose:
 					print("Chemin d’arrivée au plus tôt de x à y :", path)
@@ -111,15 +110,36 @@ class MinimalDistanceProblem():
 			print("Il n'existe aucun chemin de x à y")	
 		return None
 
-	def latest_departure(self):
+	def latest_departure(self, verbose=False):
 		"""
 		Returns the path from x to y which leaves the latest.
 
 		"""
 		
-		path = []
+		if self.x == self.y:
+			return [x]
 
-		return path
+		visited_tree = self.g.BFS(self.y, self.x, self.interval, backwards=True)
+
+		x_list = self.g.vertices[self.x]
+		y_list = self.g.vertices[self.y]
+
+		# Pour chaque sommet dans la liste y_list, vérifier s'il existe un chemin de x à y en remontant le sens des arcs de G’.
+		
+		best_path = []
+		best_time = 0
+
+		for specific_x in x_list:
+			path = self.traceback(y_list, specific_x, visited_tree, backwards=True) # specific_y est le sommet contenant y dans l'etiquette pas encore testé avec t minimale
+			if len(path) > 0:
+				label, time = path[0]
+				if time > best_time:
+					best_time = time
+					best_path = path
+
+		if verbose:
+			print("Chemin de départ le plus tard de x à y :", best_path)
+		return best_path
 
 	def fastest(self):
 		
@@ -162,8 +182,9 @@ def main():
 
 	print("Calcul des chemins minimaux...")
 	type1 = p.earliest_arrival()
-	print("Chemin de type I :", type1)
-	# type2 = g.latest_departure(x, y, interval)
+	print("Chemin de type I (Arrivée le plus tôt) :", type1)
+	type2 = p.latest_departure()
+	print("Chemin de type II (Départ le plus tard) :", type2)
 	# type3 = g.fastest(x, y, interval)
 	# type4 = g.shortest(x, y, interval)
 

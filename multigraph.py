@@ -11,6 +11,10 @@ class Multigraph:
 		self.vertices = vertices # list of strings
 		self.edges = edges # list of tuples: (u, v, t, lambda)
 
+	def __str__(self):
+
+		return "\nGraph with"+n+"vertices and"+m+"edges:\n\nVertices: "+str(self.vertices)+"\n\nEdges: "+str(self.edges)
+
 	def transform_to_graph(self):
 		"""
 		Returns a simple graph.
