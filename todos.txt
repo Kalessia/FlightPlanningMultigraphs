@@ -1,9 +1,3 @@
-Salut Kiara :)
-J'ai pensé d'ecrire une todo list. Ce qu'on fait OU que on ne retient pas, on l'efface.
-
-
-
-
 #####################################################################################################################
 
 - Dans main. Je suggere plutot une approche comme ça pour ne pas changer le format d entree des données du prof (pseudocode non testé) :
@@ -49,7 +43,6 @@ J'ai pensé d'ecrire une todo list. Ce qu'on fait OU que on ne retient pas, on l
 
 	print("Calcul des chemins minimaux...")
 
-
 #####################################################################################################################
 
 - Penser à ajouter un affichage du graphe ou multigraphe dans chaque classe, du genre:
@@ -72,10 +65,14 @@ En tout cas faire en sorte que la valeur du VERBOSE soit rentré une seule fois 
 
 #####################################################################################################################
 
-- Dans BFS : refleshir à un moyen pour verifier que la liste sommetsVisites soit correcte et ait visite tous les noeuds qu'elle devait
+- [Je suis pas sûre si il y a encore ce pb mais normalement non] Dans BFS : refleshir à un moyen pour verifier que la liste sommetsVisites soit correcte et ait visite tous les noeuds qu'elle devait
 
 #####################################################################################################################
 
-- Enregistrer l'arbre couvrant calcule par BFS dans les attributs du graphe
+- Adapter les fonctions pour tracer les courbes.
+
+#####################################################################################################################
+
+- Trouver ou créer un générateur de grands graphes pour tester avec un nb d'arcs et de sommets plus grand ?
 
 #####################################################################################################################
