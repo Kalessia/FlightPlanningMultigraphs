@@ -10,7 +10,6 @@ import numpy as np
 import re
 
 
-
 ####################################################################################################################
 #	STRUCTURES
 ####################################################################################################################
@@ -149,6 +148,8 @@ class Graph:
 		self.arbreCouvrante = arbreCouvrante # dictionnaire
 		return arbreCouvrante
 
+
+
 	# Méthode permettant d'afficher à l'écran un graphe non orienté et, éventuellement, un titre
 	def showGraphe(self, titre = "G"):
 		# """ G : un dictionnaire representant un graphe { sommet s : sommets adjacents à s}
@@ -175,8 +176,23 @@ class Graph:
 
 
 
-#showGrapheCouvrant(g, titre = "G Couvrant")	
+	def showGrapheCouvrant(self, titre = "G Couvrant"):
+		# """ G : un dictionnaire representant un graphe { sommet s : sommets adjacents à s}
+		#     titre : titre du graphe à afficher, 'G' par defaut
+		# """
+		newG = nx.DiGraph()
+		listeSommetsG = list(self.arbreCouvrante.keys())
+		newG.add_nodes_from(listeSommetsG)
 
+		for successeur in self.arbreCouvrante.keys():
+			if self.arbreCouvrante[successeur] == None:
+				continue
+			else:
+				newG.add_edge(self.arbreCouvrante[successeur], successeur)
+
+		plt.title(titre)
+		nx.draw(newG, with_labels=True, node_size=1500, node_color="skyblue")
+		plt.show()   
 
 
 	def traceback(self, sX, sY, verbose):
@@ -215,66 +231,66 @@ class Graph:
 
 
 
-def hierarchy_pos(G, root=None, width=1., vert_gap = 0.2, vert_loc = 0, xcenter = 0.5):
+# def hierarchy_pos(G, root=None, width=1., vert_gap = 0.2, vert_loc = 0, xcenter = 0.5):
 
-    '''
-    From Joel's answer at https://stackoverflow.com/a/29597209/2966723 
+#     '''
+#     From Joel's answer at https://stackoverflow.com/a/29597209/2966723 
 
-    If the graph is a tree this will return the positions to plot this in a 
-    hierarchical layout.
+#     If the graph is a tree this will return the positions to plot this in a 
+#     hierarchical layout.
 
-    G: the graph (must be a tree)
+#     G: the graph (must be a tree)
 
-    root: the root node of current branch 
-    - if the tree is directed and this is not given, the root will be found and used
-    - if the tree is directed and this is given, then the positions will be just for the descendants of this node.
-    - if the tree is undirected and not given, then a random choice will be used.
+#     root: the root node of current branch 
+#     - if the tree is directed and this is not given, the root will be found and used
+#     - if the tree is directed and this is given, then the positions will be just for the descendants of this node.
+#     - if the tree is undirected and not given, then a random choice will be used.
 
-    width: horizontal space allocated for this branch - avoids overlap with other branches
+#     width: horizontal space allocated for this branch - avoids overlap with other branches
 
-    vert_gap: gap between levels of hierarchy
+#     vert_gap: gap between levels of hierarchy
 
-    vert_loc: vertical location of root
+#     vert_loc: vertical location of root
 
-    xcenter: horizontal location of root
-    '''
-    if not nx.is_tree(G):
-        raise TypeError('cannot use hierarchy_pos on a graph that is not a tree')
+#     xcenter: horizontal location of root
+#     '''
+#     if not nx.is_tree(G):
+#         raise TypeError('cannot use hierarchy_pos on a graph that is not a tree')
 
-    if root is None:
-        if isinstance(G, nx.DiGraph):
-            root = next(iter(nx.topological_sort(G)))  #allows back compatibility with nx version 1.11
-        else:
-            root = random.choice(list(G.nodes))
+#     if root is None:
+#         if isinstance(G, nx.DiGraph):
+#             root = next(iter(nx.topological_sort(G)))  #allows back compatibility with nx version 1.11
+#         else:
+#             root = random.choice(list(G.nodes))
 
-    def _hierarchy_pos(G, root, width=1., vert_gap = 0.2, vert_loc = 0, xcenter = 0.5, pos = None, parent = None):
-        '''
-        see hierarchy_pos docstring for most arguments
+#     def _hierarchy_pos(G, root, width=1., vert_gap = 0.2, vert_loc = 0, xcenter = 0.5, pos = None, parent = None):
+#         '''
+#         see hierarchy_pos docstring for most arguments
 
-        pos: a dict saying where all nodes go if they have been assigned
-        parent: parent of this branch. - only affects it if non-directed
+#         pos: a dict saying where all nodes go if they have been assigned
+#         parent: parent of this branch. - only affects it if non-directed
 
-        '''
+#         '''
 
-        if pos is None:
-            pos = {root:(xcenter,vert_loc)}
-        else:
-            pos[root] = (xcenter, vert_loc)
-        children = list(G.neighbors(root))
-        if not isinstance(G, nx.DiGraph) and parent is not None:
-            children.remove(parent)  
-        if len(children)!=0:
-            dx = width/len(children) 
-            nextx = xcenter - width/2 - dx/2
-            for child in children:
-                nextx += dx
-                pos = _hierarchy_pos(G,child, width = dx, vert_gap = vert_gap, 
-                                    vert_loc = vert_loc-vert_gap, xcenter=nextx,
-                                    pos=pos, parent = root)
-        return pos
+#         if pos is None:
+#             pos = {root:(xcenter,vert_loc)}
+#         else:
+#             pos[root] = (xcenter, vert_loc)
+#         children = list(G.neighbors(root))
+#         if not isinstance(G, nx.DiGraph) and parent is not None:
+#             children.remove(parent)  
+#         if len(children)!=0:
+#             dx = width/len(children) 
+#             nextx = xcenter - width/2 - dx/2
+#             for child in children:
+#                 nextx += dx
+#                 pos = _hierarchy_pos(G,child, width = dx, vert_gap = vert_gap, 
+#                                     vert_loc = vert_loc-vert_gap, xcenter=nextx,
+#                                     pos=pos, parent = root)
+#         return pos
 
 
-    return _hierarchy_pos(G, root, width, vert_gap, vert_loc, xcenter)
+#     return _hierarchy_pos(G, root, width, vert_gap, vert_loc, xcenter)
 
 
 ####################################################################################################################
@@ -563,15 +579,35 @@ import datetime
 #------------------------------------------------------------------------------------------------------
 
 # Méthode permettant d'afficher un graphique de comparaison des performances ("temps de calcul" et "qualité des Solutions") de l'algorithme choisi
-def plotPerformances(p, nbIterations, secondesMaxAutorises, mode, verbose = False, save = False):
-    """ p : la probabilité qu'une arete entre 2 sommets soit crée, p E ]0,1[
-        nbIterations : nombre d'éxecutions de l'algorithme, dans le but d'en déduir une performance moyenne
-        secondesMaxAutorises : temps maximum autorisé pour l'éxecution de l'algorithme
-        nbNoeuds : nombre de nodes allant etre créées au maximum dans le graphe
-        mode : valeur déterminant l'algorithme allant etre utilisé
-        verbose : "True" pour afficher le détail des itérations
-        save : "True" pour enregistrer le tracé en format jpg
-    """
+def plotPerformances(p, nbIterations, mode, verbose = False, save = False):
+	# Effectuer  des  tests  pour  mesurer  le  temps  d’ex ́ecution  de  votre  algorithme  parrapport `a la taille de l’entr ́ee 
+	# (nombre de sommets, nombre d’arcs,  ́etiquettes sur les sommets)
+
+    # """ p : la probabilité qu'une arete entre 2 sommets soit crée, p E ]0,1[
+    #     nbIterations : nombre d'éxecutions de l'algorithme, dans le but d'en déduir une performance moyenne
+    #     mode : valeur déterminant l'algorithme allant etre utilisé
+    #     verbose : "True" pour afficher le détail des itérations
+    #     save : "True" pour enregistrer le tracé en format jpg
+    # """
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     # Calcul de la taille nMaxAGlouton pour l'algorithme (G)
     # nMax : taille jusqu'à laquelle l'algorithme tourne rapidement, i.e temps G(nMax,p) < secondesMaxAutorises
     nMax = 0
@@ -819,8 +855,8 @@ g = mg.transform_to_graph(True)
 #print(g.adjacency_list)
 #print("------------------------------------------------------------------")
 
-#g.BFS("a", "g", [0, 10], True)
-#print("------------------------------------------------------------------")
+g.BFS("a", "g", [0, 10], True)
+print("------------------------------------------------------------------")
 
 #earliest_arrival('a', 'g', g, verbose = True)
 #print("------------------------------------------------------------------")
@@ -828,7 +864,7 @@ g = mg.transform_to_graph(True)
 g.showGraphe(titre = "graphe issu du multigraphe")
 #print("------------------------------------------------------------------")
 
-#showGrapheCouvrant(g, titre = "G Couvrant")
+#g.showGrapheCouvrant(titre = "G Couvrant xxx")
 #print("------------------------------------------------------------------")
 
 
