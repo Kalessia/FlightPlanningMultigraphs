@@ -1,0 +1,10 @@
+Nouvelles :
+
+
+- Création d'un fichier todos.txt pour noter les idées à proposer ou à se rappeler (liste à effacer au fur et au mesure)
+- Modification de la fonction acquisitionMultigraphe(nomFichier) pour returner mg = None en cas de mauvais nom de fichier rentré
+- Modification de la fonction acquisitionMultigraphe(nomFichier) pour retourner les edges dans le format liste de (str,str,int,int)
+  donc compatibles pour la fonction de creation de la liste d'adjacence
+- j'ai du remettre la liste d adj dans le format ('a', 1): [(('b', 2), 1), (('a', 2), 0)] (elle etait 'a': [(('b', 2), 1), (('a', 2), 0)]) 
+  car contrairement au dictionnaire vertices, qui est bien pratique rangée par sommet du multigraphe, ici j'avais besoin de la source 
+  exprimee en format "sommet du graphe" (doublet).

@@ -1,10 +1,18 @@
+####################################################################################################################
+#	IMPORTS
+####################################################################################################################
+
 import operator
 import copy
 import pandas as pd
 import numpy as np
 import re
 
-# -------- MULTIGRAPH -------- #
+
+
+####################################################################################################################
+#	STRUCTURES
+####################################################################################################################
 
 class Multigraph:
 
@@ -15,11 +23,133 @@ class Multigraph:
 		self.vertices = vertices # list of strings
 		self.edges = edges # list of tuples: (u, v, t, lambda)
 
+	def transform_to_graph(self, verbose=False):
+		"""
+		Returns a simple graph.
+		"""
+
+		newVertices = {} # {original_vertex : list of new vertices}
+		newEdges = []
+
+		for vertex in self.vertices:
+			newVertices[vertex] = []
+
+		for source, dest, t, weight in self.edges :
+
+			# vOUT(sommet multiGraphe) = liste de doublets (v, t) avec v = sommet multiGraphe et t = poids (date) de l'arc sortant de v
+			u = (source, t)
+			if u not in newVertices[source]:
+				newVertices[source].append(u)
+
+			# vIN(sommet multiGraphe) = liste de doublets (v, t) avec v = sommet multiGraphe et t = poids (date) de l'arc entrant de v + lambda
+			v = (dest, t + weight)
+			if v not in newVertices[dest]:
+				newVertices[dest].append(v)
+
+			e = (u, v, weight)
+			newEdges.append(e)
+
+		for v in newVertices.keys(): # v: name of original vertex
+
+			# vertices are sorted by t
+			newVertices[v].sort(key = operator.itemgetter(1), reverse = False)
+
+			# arcs with weight = 0 are created between vertices with the same name
+			to_visit = newVertices[v]
+			for i in range(len(to_visit)-1):
+				e = (to_visit[i], to_visit[i+1], 0)
+				newEdges.append(e)
+
+		return Graph(self.n, self.m, newVertices, newEdges, verbose)
+
 	def afficheMultigraphe(self):
 		print("\nMultigraph de " + str(self.n) + " sommets et " + str(self.m) + " arcs :")
 		print("\tListe de sommets : " + str(self.vertices) )
 		print("\tListe d'arcs : " + str(self.edges) + "\n" )
 
+#-------------------------------------------------------------------------------------------------------------------
+
+class Graph:
+
+	def __init__(self, n, m, vertices, edges, verbose=False):
+		
+		self.n = n # number of vertices
+		self.m = m # number of edges
+		self.vertices = vertices # dictionary with key: original vertex, and value: list of new vertices (name, time) sorted by time
+		self.edges = edges # list of tuples (u, v, weight), with u and v: tuples (name, time)
+		self.adjacency_list = self.__obtain_adjacency_list(vertices, edges, verbose) # dictionary
+
+	def __obtain_adjacency_list(self, vertices, edges, verbose=False):
+		"""
+		Returns an adjacency list (dictionary).
+		"""
+
+		# Construction de adjacency_list[key=source][val=destination, poids] (dictionnaire)
+		adjacency_list = {}
+
+		# Initialisation
+		for l in vertices.values():
+			for s in l:
+				adjacency_list[s] = []
+
+		for source, dest, weight in edges :
+			adjacency_list[source].append((dest, weight))
+
+		if verbose:
+			print("\nListe d'adjacence :", adjacency_list)
+
+		return adjacency_list
+
+	def BFS(self, x, y, interval, verbose=False):
+		"""
+		Returns the <<<<<arbre couvrant>>>>>> from x to y.
+
+		y : liste de destinations
+		"""
+
+		traceback = {} # Dictionnaire clé = successeur du pere (fils) : value = pere
+
+		racine = None
+		for v in self.vertices[x]:
+			if v[1] >= interval[0]:
+				racine = v # sommet source contenant l'etiquette x et la plus petite date
+				break
+		
+		if racine == None:
+			print("Aucun arbre couvrant possible entre x et y dans l'intervalle selectionné")
+			return None
+
+		print(racine)
+		destinations = self.vertices[y] # liste des destinations contenant l'etiquette y
+		print(destinations)
+
+		f = [racine]	# Initialisation de la file avec le sommet source x
+		sommetsVisites = [racine] # Initialisation de la liste de sommets dejà visités avec le sommet source x
+		traceback[racine] = None
+
+		while (len(f) > 0):
+			print("\nNouvelle ite - etat file :", f)
+			sommetATraiter = f.pop(0)
+			print("Sommet à traiter :", sommetATraiter)
+			if sommetATraiter in self.adjacency_list.keys():
+				for successeur, _ in self.adjacency_list[sommetATraiter]:
+					print("\tSuccesseur :", successeur)
+					if successeur not in sommetsVisites:
+						sommetsVisites.append(successeur)
+						print("Sommets visites =", sommetsVisites)
+						f.append(successeur)
+						traceback[(successeur)] = sommetATraiter
+
+		#if len(sommetsVisites) != len(sommetsFermes):
+			#return "Erreur algorithme BFS"
+		print("traceback :", traceback)
+		return traceback	
+
+
+
+####################################################################################################################
+#	OUTILS
+####################################################################################################################
 
 def acquisitionMultigraphe(nomFichier):
 	"""
@@ -31,16 +161,24 @@ def acquisitionMultigraphe(nomFichier):
 	vertices = []
 	edges = []
 	
-	with open(nomFichier, 'r') as fichier:
-		lignes = fichier.readlines()
-		
+	try:
+		with open(nomFichier, 'r') as fichier:
+			lignes = fichier.readlines()
+	except:
+		print("Erreur : fichier non trouvé")
+		return None
+	
+	
 	n = int(lignes[0])
 	m = int(lignes[1])
 	
 	for i in range(2, len(lignes)):
 		r = re.compile("^[(][\w]*[,][\w]*[,][0-9]*[,][0-9]*[)]\n*$")
 		if r.match(lignes[i]) is not None:
-			edges.append(lignes[i].split("\n")[0])
+			# format d'un arc : (source, dest, int(time), int(weight))
+			e = lignes[i].split("(")[1].split(")")[0].split(",")
+			edges.append((e[0], e[1], int(e[2]), int(e[3])))
+			print((e[0], e[1], int(e[2]), int(e[3])))
 		else :
 			vertices.append(lignes[i].split("\n")[0])
 
@@ -49,6 +187,7 @@ def acquisitionMultigraphe(nomFichier):
 		
 	return Multigraph(n, m, vertices, edges)
 
+#-------------------------------------------------------------------------------------------------------------------
 
 def transformationMultigrapheListeAdjacence(multiG, verbose = False):
 	"""
@@ -111,6 +250,7 @@ def transformationMultigrapheListeAdjacence(multiG, verbose = False):
 
 	return listeAdj
 
+#-------------------------------------------------------------------------------------------------------------------
 
 def transformationMultigrapheMatAdjacence(multiG, verbose = False):
 	"""
@@ -177,6 +317,7 @@ def transformationMultigrapheMatAdjacence(multiG, verbose = False):
 
 	return ensV, ensE, matG
 
+#-------------------------------------------------------------------------------------------------------------------
 
 def affichageMatG(matG, ensV):
 	df = pd.DataFrame(matG, index = ensV, columns = ensV)
@@ -185,10 +326,29 @@ def affichageMatG(matG, ensV):
 	df[df==-1] = "-"
 	print(df, "\n")
 
+#-------------------------------------------------------------------------------------------------------------------
+
+def traceback(x, y, verbose):
+
+	fils = y
+	pere = traceback[y]
+	path = [y]
+	while (pere != None):
+		path.append(pere)
+		fils = pere
+		pere = traceback[fils]
+	
+	path.reverse()
+
+	if verbose:
+		print("\nRésultat BFS(x =", x, ", y =", y, ") :", path)
 
 
+####################################################################################################################
+#	CHEMINS
+####################################################################################################################
 
-def earliest_arrival(x, y, lAdj, verbose = False):
+def earliest_arrival(x, y, g, verbose=False): # <-------------------------- commnentaire à effacer : remplacer g par self ; interval gere par arbre couvrante
 	"""
 	Returns the path from x to y which arrives the earliest.
 
@@ -196,45 +356,28 @@ def earliest_arrival(x, y, lAdj, verbose = False):
 	x : sommet source dans le multigraphe pondéré par le temps
 	y : sommet destination dans le multigraphe pondéré par le temps
 	"""
-
-	# Instanciation d'une liste listeY avec les noeuds contenant y dans leur étiquette classés par ordre de t croissant
-	listeY = []
-	listeX = []
-	ensV = list(listeAdj.keys())
-	print(ensV)
-	for sommet in ensV:
-		print(sommet[0], y)
-		if sommet[0] == y :
-			listeY.append(sommet)
-			print("Y", listeY)
-		if sommet[0] == x :
-			listeX.append(sommet)
-			print("X", listeX)
-
-	listeY.sort(key = operator.itemgetter(1), reverse=False)
-
+	listeX = g.vertices[x].reverse()  # <-------------------------- est ce que cela est une bonne idee our eviter les doublons de passages par x1, x2, x3...?
+	listeY = g.vertices[y]
 	if verbose :
-		print("listeY = liste des noeuds contenant y dans leur étiquette triée par t croissant:", listeY)
-		print("listeX = liste des noeuds contenant x dans leur étiquette :", listeX)
+		print("Liste des noeuds contenant y dans leur étiquette triée par t croissant:", listeY)
+		print("Liste des noeuds contenant x dans leur étiquette :", listeX)
 
 	# Pour chaque sommet dans la liste l, vérifier s' il existe un chemin de x à y en remontant le sens des arcs de G’.
 	# Pendant cette recherche, les noeuds rejoint par un arc de poids = 0 ne sont pas retenus dans la solution
 	# L’algorithme s'arrête au premier chemin de x à y trouvé
-	for s1 in listeY:
-		for s2 in listeX :
-			path = pcch_BFS(s2, s1, lAdj, verbose)
-			if path != None :
-
+	for sY in g.vertices[y]:
+		for sX in g.vertices[x]:
+			path = traceback(sX, sY, verbose)
+			if path != None:
 				if verbose:
 					print("Chemin d’arrivée au plus tôt de x à y :", path)
-
 				return path
 
 	if verbose:
-		print("Il n'existe aucun chemin de x à y")
-	
+		print("Il n'existe aucun chemin de x à y")	
 	return None
-	
+
+#-------------------------------------------------------------------------------------------------------------------
 
 def latest_departure(x, y, matG, verbose):
 	"""
@@ -251,6 +394,8 @@ def latest_departure(x, y, matG, verbose):
 	path = []
 
 	return path
+
+#-------------------------------------------------------------------------------------------------------------------
 
 def fastest(x, y, matG, verbose):
 	"""
@@ -270,6 +415,8 @@ def fastest(x, y, matG, verbose):
 
 	return path
 
+#-------------------------------------------------------------------------------------------------------------------
+
 def shortest(x, y, matG, verbose):
 	"""
 	x : sommet source dans le multigraphe pondéré par le temps
@@ -285,45 +432,7 @@ def shortest(x, y, matG, verbose):
 
 	return path
 
-
-def pcch_BFS(x, y, lAdj, verbose = False):
-	"""
-	"""
-	traceback = {} # Dictionnaire clé = successeur du pere (fils) : value = pere
-	f = [x]	# Initialisation de la file avec le sommet source x
-	sommetsVisites = [x] # Initialisation de la liste de sommets dejà visités avec le sommet source x
-	traceback[x] = None
-
-	while (len(f) > 0):
-		print("\nNouvelle ite - etat file :", f)
-		sommetATraiter = f.pop(0)
-		print("Sommet à traiter :", sommetATraiter)
-		if sommetATraiter in lAdj.keys():
-			for successeur, _ in lAdj[sommetATraiter]:
-				print("\tSuccesseur :", successeur)
-				if successeur not in sommetsVisites:
-					sommetsVisites.append(successeur)
-					print("Sommets visites =", sommetsVisites)
-					f.append(successeur)
-					traceback[(successeur)] = sommetATraiter
-
-	if len(sommetsVisites) != len(lAdj):
-		return "Erreur algorithme pcch_BFS"
-
-	fils = y
-	pere = traceback[y]
-	path = [y]
-	while (pere != None):
-		path.append(pere)
-		fils = pere
-		pere = traceback[fils]
-	
-	path.reverse()
-
-	if verbose:
-		print("\nRésultat pcch_BFS(x =", x, ", y =", y, ", lAdj) :", path)
-
-	return path
+#-------------------------------------------------------------------------------------------------------------------
 
 
 
@@ -331,19 +440,29 @@ def pcch_BFS(x, y, lAdj, verbose = False):
 
 
 
-#-----------------------------------------------------------
 
-g = acquisitionMultigraphe("multigrapheG1.txt")
+####################################################################################################################
+#	TESTS DEBUG
+####################################################################################################################
 
-if g != None :
-	g.afficheMultigraphe()
+mg = acquisitionMultigraphe("multigrapheG1.txt")
+
+if mg != None :
+	mg.afficheMultigraphe()
 print("------------------------------------------------------------------")
 
-transformationMultigrapheMatAdjacence(g, verbose = False)
+#transformationMultigrapheMatAdjacence(g, verbose = False)
+#print("------------------------------------------------------------------")
+
+#listeAdj = transformationMultigrapheListeAdjacence(g, verbose = False)
+#print("------------------------------------------------------------------")
+
+g = mg.transform_to_graph(True)
+print(g.adjacency_list)
 print("------------------------------------------------------------------")
 
-listeAdj = transformationMultigrapheListeAdjacence(g, verbose = False)
-print("------------------------------------------------------------------")
+g.BFS("a", "g", [3, 10], True)
+#print("------------------------------------------------------------------")
 
-#pcch_BFS(('a',1), ('g',8), listeAdj, True)
-earliest_arrival('a', 'g', listeAdj, verbose = True)
+
+#earliest_arrival('a', 'g', listeAdj, verbose = True)
