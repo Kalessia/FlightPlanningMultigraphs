@@ -704,54 +704,54 @@ def plotPerformances(maxN, maxM, probM, maxInterval_dates, nbTests, nbIterations
 		ordonnee_tType3.append( (sum(tType3)/len(tType3)) )
 		ordonnee_tType4.append( (sum(tType4)/len(tType4)) )
 
-		if verbose:
-			print("Temps d'executions moyens rélatifs au test n.", nb, "\n\tordonnee_tGlobal :", ordonnee_tGlobal, "\n\tordonnee_tInit :", ordonnee_tInit, "\n\tordonnee_tType1 :", ordonnee_tType1, "\n\tordonnee_tType2 :", ordonnee_tType2, "\n\tordonnee_tType3 :", ordonnee_tType3, "\n\tordonnee_tType4 :", ordonnee_tType4)
-
-
-    # Affichage graphique
-    plt.figure(figsize = (10, 10))
-    plt.suptitle("Performances de l'algorithme")
-    plt.rc('xtick', labelsize=10)    # fontsize of the tick labels
-
-    # Construction et affichage du tracé "temps de calcul"
-    plt.subplot(3, 1, 1)
-    plt.title("Analyse du temps de calcul en fonction du nombre de sommets n")
-    plt.xlabel("n") # nombre de sommets du graphe G
-    plt.ylabel("t(n)") # temps de calcul en fonction du nombre de sommets du graphe G
+	if verbose:
+		print("Temps d'executions moyens rélatifs au test n.", nb, "\n\tordonnee_tGlobal :", ordonnee_tGlobal, "\n\tordonnee_tInit :", ordonnee_tInit, "\n\tordonnee_tType1 :", ordonnee_tType1, "\n\tordonnee_tType2 :", ordonnee_tType2, "\n\tordonnee_tType3 :", ordonnee_tType3, "\n\tordonnee_tType4 :", ordonnee_tType4)
+	
+	
+	#Affichage graphique
+	plt.figure(figsize = (10, 10))
+	plt.suptitle("Performances")
+	plt.rc('xtick', labelsize=10)    # fontsize of the tick labels
+	
+	# Construction et affichage du tracé "temps de calcul"
+	plt.subplot(3, 1, 1)
+	plt.title("Analyse du temps de calcul en fonction du nombre de sommets n")
+	plt.xlabel("n") # nombre de sommets du graphe G
+	plt.ylabel("t(n)") # temps de calcul en fonction du nombre de sommets du graphe G
 	plt.plot(abscisse_n, ordonnee_tGlobal, color = 'blue')
 	plt.plot(abscisse_n, ordonnee_tInit, color = 'red')
 	plt.plot(abscisse_n, ordonnee_tType1, color = 'green')
 	plt.plot(abscisse_n, ordonnee_tType2, color = 'yellow')
 	plt.plot(abscisse_n, ordonnee_tType3, color = 'black')
 	plt.plot(abscisse_n, ordonnee_tType4, color = 'pink')
-
-    plt.subplot(3, 1, 2)
+	
+	plt.subplot(3, 1, 2)
 	plt.title("Analyse du temps de calcul en fonction du nombre d'arcs m")
-    plt.xlabel("m") # nombre d'arcs du graphe G
-    plt.ylabel("t(m)") # temps de calcul en fonction du nombre d'arcs du graphe G
+	plt.xlabel("m") # nombre d'arcs du graphe G
+	plt.ylabel("t(m)") # temps de calcul en fonction du nombre d'arcs du graphe G
 	plt.plot(abscisse_m, ordonnee_tGlobal, color = 'blue')
 	plt.plot(abscisse_m, ordonnee_tInit, color = 'red')
 	plt.plot(abscisse_m, ordonnee_tType1, color = 'green')
 	plt.plot(abscisse_m, ordonnee_tType2, color = 'yellow')
 	plt.plot(abscisse_m, ordonnee_tType3, color = 'black')
 	plt.plot(abscisse_m, ordonnee_tType4, color = 'pink')
-
-    plt.subplot(3, 1, 3)
+	
+	plt.subplot(3, 1, 3)
 	plt.title("Analyse du temps de calcul en fonction de l'intervalle de dates choisies interval_dates")
-    plt.xlabel("interval_dates") # nombre de sommets du graphe G
-    plt.ylabel("t(interval_dates)") # temps de calcul en fonction de l'interval de dates choisies du graphe G
-    plt.plot(abscisse_interval_dates, ordonnee_tGlobal, color = 'blue')
+	plt.xlabel("interval_dates") # nombre de sommets du graphe G
+	plt.ylabel("t(interval_dates)") # temps de calcul en fonction de l'interval de dates choisies du graphe G
+	plt.plot(abscisse_interval_dates, ordonnee_tGlobal, color = 'blue')
 	plt.plot(abscisse_interval_dates, ordonnee_tInit, color = 'red')
 	plt.plot(abscisse_interval_dates, ordonnee_tType1, color = 'green')
 	plt.plot(abscisse_interval_dates, ordonnee_tType2, color = 'yellow')
 	plt.plot(abscisse_interval_dates, ordonnee_tType3, color = 'black')
 	plt.plot(abscisse_interval_dates, ordonnee_tType4, color = 'pink')
-
-    # Sauvegarde du tracé
-    if (save) :
-    	plt.savefig("TestResults/" + str(datetime.date.today()) + str(datetime.datetime.now().strftime("_%H_%M_%S")) + ".jpeg", transparent = True)
-
-    plt.show()
+	
+	# Sauvegarde du tracé
+	if (save):
+		plt.savefig("TestResults/" + str(datetime.date.today()) + str(datetime.datetime.now().strftime("_%H_%M_%S")) + ".jpeg", transparent = True)
+	
+	plt.show()
 
 
 
