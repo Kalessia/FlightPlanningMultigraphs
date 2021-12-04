@@ -98,8 +98,9 @@ class MinimalDistanceProblem():
 
 		# Pour chaque sommet dans la liste y_list, vérifier s' il existe un chemin de x à y en remontant le sens des arcs de G’.
 		# L’algorithme s'arrête au premier chemin de x à y trouvé
-
-		for specific_y in reversed(y_list):
+		print(y_list)
+		for specific_y in y_list:
+			print("Trying specific_y:",specific_y)
 			path = self.traceback(x_list, specific_y) # specific_y est le sommet contenant y dans l'etiquette pas encore testé avec t minimale
 			if path != None:
 				if verbose:
@@ -155,6 +156,7 @@ def main():
 
 	print("Graphe en cours de transformation...")
 	g = mg.transform_to_graph()
+	print(g)
 
 	p = MinimalDistanceProblem(g, x, y, interval)
 

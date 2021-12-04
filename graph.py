@@ -13,7 +13,6 @@ class Graph:
 		Returns an adjacency list (dictionary).
 		"""
 
-		print(vertices)
 		# Construction de adjacency_list[key=source][val=destination, poids] (dictionnaire)
 		adjacency_list = {}
 
@@ -26,9 +25,13 @@ class Graph:
 			adjacency_list[source].append((dest, weight))
 
 		if verbose:
-			print("\nListe d'adjacence :", adjacency_list)
+			print("Liste d'adjacence :", adjacency_list)
 
 		return adjacency_list
+
+	def __str__(self):
+
+		return "\nGraph: \n\nVertices: "+str(self.vertices)+"\n\nEdges: "+str(self.edges)+"\n\nAdjacency List: "+str(self.adjacency_list)
 
 	def BFS(self, x, y, interval, verbose=False):
 		"""
