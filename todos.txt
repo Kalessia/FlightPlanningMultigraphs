@@ -66,6 +66,7 @@ En tout cas faire en sorte que la valeur du VERBOSE soit rentré une seule fois 
 #####################################################################################################################
 
 - [Je suis pas sûre si il y a encore ce pb mais normalement non] Dans BFS : refleshir à un moyen pour verifier que la liste sommetsVisites soit correcte et ait visite tous les noeuds qu'elle devait
+> C'est la partie en gris, normalement on doit verifier que les sommets travaillés ce sont bien tous, MAIS ce n est pas necessaire pour le fonctionnement
 
 #####################################################################################################################
 
