@@ -4,6 +4,7 @@
 
 import operator
 import copy
+from numpy.lib.type_check import _nan_to_num_dispatcher
 import pandas as pd
 import numpy as np
 import re
@@ -78,6 +79,7 @@ class Graph:
 		self.vertices = vertices # dictionary with key: original vertex, and value: list of new vertices (name, time) sorted by time
 		self.edges = edges # list of tuples (u, v, weight), with u and v: tuples (name, time)
 		self.adjacency_list = self.__obtain_adjacency_list(vertices, edges, verbose) # dictionary
+		self.arbreCouvrante = None
 
 	def __obtain_adjacency_list(self, vertices, edges, verbose=False):
 		"""
@@ -100,6 +102,7 @@ class Graph:
 
 		return adjacency_list
 
+
 	def BFS(self, x, y, interval, verbose=False):
 		"""
 		Returns the <<<<<arbre couvrant>>>>>> from x to y.
@@ -107,7 +110,7 @@ class Graph:
 		y : liste de destinations
 		"""
 
-		traceback = {} # Dictionnaire clé = successeur du pere (fils) : value = pere
+		arbreCouvrante = {} # Dictionnaire clé = successeur du pere (fils) : value = pere
 
 		racine = None
 		for v in self.vertices[x]:
@@ -125,7 +128,7 @@ class Graph:
 
 		f = [racine]	# Initialisation de la file avec le sommet source x
 		sommetsVisites = [racine] # Initialisation de la liste de sommets dejà visités avec le sommet source x
-		traceback[racine] = None
+		arbreCouvrante[racine] = None
 
 		while (len(f) > 0):
 			print("\nNouvelle ite - etat file :", f)
@@ -138,12 +141,49 @@ class Graph:
 						sommetsVisites.append(successeur)
 						print("Sommets visites =", sommetsVisites)
 						f.append(successeur)
-						traceback[(successeur)] = sommetATraiter
+						arbreCouvrante[(successeur)] = sommetATraiter
 
 		#if len(sommetsVisites) != len(sommetsFermes):
 			#return "Erreur algorithme BFS"
-		print("traceback :", traceback)
-		return traceback	
+		print("arbreCouvrante :", arbreCouvrante)
+		self.arbreCouvrante = arbreCouvrante # dictionnaire
+		return arbreCouvrante	
+
+
+
+	def traceback(self, sX, sY, verbose):
+
+		print("test traceback : sX, sY", sX, sY)
+		if sX == None or sY == None:
+			return None
+		
+		if sX not in g.arbreCouvrante.keys() or sY not in g.arbreCouvrante.keys() :
+			return None
+
+		if sX == sY:
+			if verbose:
+				print("\nRésultat traceback(x =", sX, ", y =", sY, ") :", [sX])
+			return [sX]
+
+		fils = sY
+		pere = self.arbreCouvrante[sY]
+		path = [sY]
+		while (pere != None or pere != sX):
+			path.append(pere)
+			print ("test : pere, fils, path :", pere, fils, path)
+			fils = pere
+			pere = self.arbreCouvrante[fils]
+		
+		path.reverse()
+
+		if pere != sX:
+			return None
+
+		if verbose:
+			print("\nRésultat traceback(x =", sX, ", y =", sY, ") :", path)
+
+		return path
+
 
 
 
@@ -328,21 +368,6 @@ def affichageMatG(matG, ensV):
 
 #-------------------------------------------------------------------------------------------------------------------
 
-def traceback(x, y, verbose):
-
-	fils = y
-	pere = traceback[y]
-	path = [y]
-	while (pere != None):
-		path.append(pere)
-		fils = pere
-		pere = traceback[fils]
-	
-	path.reverse()
-
-	if verbose:
-		print("\nRésultat BFS(x =", x, ", y =", y, ") :", path)
-
 
 ####################################################################################################################
 #	CHEMINS
@@ -352,30 +377,31 @@ def earliest_arrival(x, y, g, verbose=False): # <-------------------------- comm
 	"""
 	Returns the path from x to y which arrives the earliest.
 
-	lAdj : graphe G’=(V,E) traduisant un multigraphe pondéré par le temps
 	x : sommet source dans le multigraphe pondéré par le temps
 	y : sommet destination dans le multigraphe pondéré par le temps
 	"""
-	listeX = g.vertices[x].reverse()  # <-------------------------- est ce que cela est une bonne idee our eviter les doublons de passages par x1, x2, x3...?
+	listeX = list(reversed(g.vertices[x]))  # <-------------------------- est ce que cela est une bonne idee our eviter les doublons de passages par x1, x2, x3...?
 	listeY = g.vertices[y]
+
 	if verbose :
 		print("Liste des noeuds contenant y dans leur étiquette triée par t croissant:", listeY)
 		print("Liste des noeuds contenant x dans leur étiquette :", listeX)
 
-	# Pour chaque sommet dans la liste l, vérifier s' il existe un chemin de x à y en remontant le sens des arcs de G’.
-	# Pendant cette recherche, les noeuds rejoint par un arc de poids = 0 ne sont pas retenus dans la solution
+	# Pour chaque sommet dans la liste listeY, vérifier s' il existe un chemin de x à y en remontant le sens des arcs de G’.
 	# L’algorithme s'arrête au premier chemin de x à y trouvé
-	for sY in g.vertices[y]:
-		for sX in g.vertices[x]:
-			path = traceback(sX, sY, verbose)
+	sX = None
+	sY = None
+	for sY in listeY:
+		for sX in listeX:
+			path = g.traceback(sX, sY, verbose) # sX est une liste de noeuds, sY est le sommet contenant y dans l'etiquette pas encore testé avec t minimale
 			if path != None:
 				if verbose:
 					print("Chemin d’arrivée au plus tôt de x à y :", path)
 				return path
 
-	if verbose:
-		print("Il n'existe aucun chemin de x à y")	
-	return None
+		if verbose:
+			print("Il n'existe aucun chemin de x à y")	
+		return None
 
 #-------------------------------------------------------------------------------------------------------------------
 
@@ -461,8 +487,270 @@ g = mg.transform_to_graph(True)
 print(g.adjacency_list)
 print("------------------------------------------------------------------")
 
-g.BFS("a", "g", [3, 10], True)
+g.BFS("a", "g", [0, 10], True)
 #print("------------------------------------------------------------------")
 
 
-#earliest_arrival('a', 'g', listeAdj, verbose = True)
+earliest_arrival('a', 'g', g, verbose = True)
+
+
+
+
+
+
+
+import networkx as nx
+import matplotlib.pyplot as plt
+import time
+import datetime
+
+# Méthode permettant d'afficher à l'écran un graphe non orienté et, éventuellement, un titre
+def showGraphe(G, titre = "G"):
+    """ G : un dictionnaire representant un graphe { sommet s : sommets adjacents à s}
+        titre : titre du graphe à afficher, 'G' par defaut
+    """
+    newG = nx.Graph()
+    newG.add_nodes_from(list(G.keys()))
+    for v1 in G.keys() :
+        for v2 in G.keys() :
+            if (v2, v1) not in newG.edges and v2 in G[v1]:
+                newG.add_edge(v1, v2)
+
+    plt.title(titre)
+    nx.draw(newG, with_labels=True, node_size=1500, node_color="skyblue", pos=nx.circular_layout(G))
+
+    plt.show()   
+
+#------------------------------------------------------------------------------------------------------
+
+# Méthode permettant d'afficher un graphique de comparaison des performances ("temps de calcul" et "qualité des Solutions") de l'algorithme choisi
+def plotPerformances(p, nbIterations, secondesMaxAutorises, mode, verbose = False, save = False):
+    """ p : la probabilité qu'une arete entre 2 sommets soit crée, p E ]0,1[
+        nbIterations : nombre d'éxecutions de l'algorithme, dans le but d'en déduir une performance moyenne
+        secondesMaxAutorises : temps maximum autorisé pour l'éxecution de l'algorithme
+        nbNoeuds : nombre de nodes allant etre créées au maximum dans le graphe
+        mode : valeur déterminant l'algorithme allant etre utilisé
+        verbose : "True" pour afficher le détail des itérations
+        save : "True" pour enregistrer le tracé en format jpg
+    """
+    # Calcul de la taille nMaxAGlouton pour l'algorithme (G)
+    # nMax : taille jusqu'à laquelle l'algorithme tourne rapidement, i.e temps G(nMax,p) < secondesMaxAutorises
+    nMax = 0
+    t = 0
+    while t < secondesMaxAutorises :
+        nMax += 1
+        
+        # Méthode permettant de générer des graphes aléatoires
+        G = randomGraphe(nMax, p)
+
+        t1 = time.time()
+
+        # Selection du mode (algorithme allant etre utilisé)
+        if (mode == 1) :
+            res = algoCouplage(G)
+        elif (mode == 2) :
+            res = algoGlouton(G)
+        elif (mode == 3) :
+            res = branchement(G)
+        elif (mode == 4) :
+            res = branchementBornesCouplage(G)
+        elif (mode == 5) :
+            res = branchementOptimiseCouplage(G)
+        elif (mode == 6) :
+            res = branchementOptimiseCouplage_uDegreMax(G)
+        else :
+            print("Aucun mode ne correspond à la valeur passée en paramètre. Veuillez choisir une autre valeur de mode.")
+            return
+
+        t2 = time.time()
+        t = t2-t1
+
+    if verbose :
+        print("nMax = ", nMax, "\n")
+
+    y1 = []  # axe des ordonnées : liste des temps de calcul moyen, pour l'algorithme sélectionné(G)
+    y2 = []  # axe des ordonnées : liste des tailles des couplages (nombre de sommets) moyen, pour l'algorithme sélectionné(G)
+    y3 = []  # axe des ordonnées : liste du nombre de noeuds générés pour l'algorithme de branchement (G)
+    x = []   # axe des abscisses : liste de "nombre de sommets" {1/10 nbIterations, 2/10 nbIterations, ... , nbIterations}
+    
+    # Pour chaque 1/10 de nMax
+    for i in range(1, 11) :
+
+        tabTemps = []
+        moyTemps = 0
+        resAlgo = []
+        moyQualiteSolutions = 0
+        tabNoeudsGeneneres = []
+        moyNbNoeudsGeneres = 0
+        nbNoeuds = 0
+        
+
+        # Pour chacune des nbIterations démandées en paramètre
+        for ite in range(nbIterations):
+
+            # Méthode permettant de générer des graphes aléatoires
+            G = randomGraphe(int(nMax * (i / 10)), p)
+
+            # Execution et recueil statistiques de l'algorithme (G)
+            t1 = time.time()
+
+            # Variable res et noeud permettant de stocker le résultat de l'algorithme et le nombre de noeuds générés
+            
+            # Selection du mode (algorithme allant etre utilisé)
+            if (mode == 1) :
+                res = algoCouplage(G)
+            elif (mode == 2) :
+                res = algoGlouton(G)
+            elif (mode == 3) :
+                res, nbNoeuds = branchement(G)
+            elif (mode == 4) :
+                res, nbNoeuds = branchementBornesCouplage(G)
+            elif (mode == 5) :
+                res, nbNoeuds = branchementOptimiseCouplage(G)
+            elif (mode == 6) :
+                res, nbNoeuds = branchementOptimiseCouplage_uDegreMax(G)
+            else :
+                print("Aucun mode ne correspond à la valeur passée en paramètre. Veuillez choisir une autre valeur de mode.")
+                return
+
+            t2 = time.time()
+            t = t2-t1
+
+            tabTemps.append(t) # temps de calcul de l'algorithme pour l'itération courante
+            resAlgo.append(len(res)) # qualité des solutions pour l'itération courante
+            if (mode > 2) : # Dans le cas ou on utilise un algorithme de branchement
+                tabNoeudsGeneneres.append(nbNoeuds)
+
+            if verbose : 
+                print("x = ", i, "/10 nMax, iteration n.", ite+1, ":", "\n\t\ttabTemps =", tabTemps, "\n\t\tresAlgo =", resAlgo, "\n")
+
+        # Calcul et stockage du temps d'execution moyen et de la qualité des solutions moyenne par rapport aux 'nbIterations' éxecutions
+        moyTemps = sum(tabTemps)/len(tabTemps)
+        moyQualiteSolutions = int(sum(resAlgo)/len(resAlgo))
+        if (mode > 2) :
+            moyNbNoeudsGeneres = int(sum(tabNoeudsGeneneres)/len(tabNoeudsGeneneres))
+        
+
+        y1.append(moyTemps)
+        y2.append(moyQualiteSolutions)
+        if (mode > 2) :
+            y3.append(moyNbNoeudsGeneres)
+        x.append(int(nMax * (i / 10)))
+
+        if verbose : 
+            print("\nx = ", i, "/10 nMax (" + str(int(nbIterations * i/10)) + ") : moyTemps =", moyTemps, "moyQualiteSolutions =", moyQualiteSolutions)
+            print("----------------------------------------------------------------------------------------------\n")
+
+    # Selection du nom de l'algorithme
+    if (mode == 1) :
+        nomAlgo = "algo_Couplage"
+    elif (mode == 2) :
+        nomAlgo = "algo_Glouton"
+    elif (mode == 3) :
+        nomAlgo = "branchement"
+    elif (mode == 4) :
+        nomAlgo = "branchement_Bornes_Couplage"
+    elif (mode == 5) :
+        nomAlgo = "branchement_Optimise_Couplage"
+    elif (mode == 6) :
+        nomAlgo = "branchement_Optimise_Couplage_uDegreMax"
+    else :
+        print("Aucun mode ne correspond à la valeur passée en paramètre. Veuillez choisir une autre valeur de mode.")
+        return
+
+    # Affichage graphique
+    plt.figure(figsize = (10, 10))
+    plt.suptitle("Performances de l'algorithme " + nomAlgo + " avec nMax =" + str(nMax) + " nodes dans le graphe et p = " + str(p) + "\n", color = 'black', size = 10)
+    plt.rc('xtick', labelsize=10)    # fontsize of the tick labels
+
+    # Construction et affichage du tracé "temps de calcul"
+    plt.subplot(3, 1, 1)
+    plt.title("Analyse du temps de calcul en fonction du nombre de sommets n")
+    plt.xlabel("n") # nombre de sommets du graphe G
+    plt.ylabel("t(n)") # temps de calcul en fonction du nombre de sommets du graphe G
+    plt.plot(x, y1, color = 'blue')
+
+    # Construction et affichage du tracé "qualité des solutions"
+    plt.subplot(3, 1, 2)
+    plt.title("Analyse de la qualité des solutions en fonction du nombre de sommets n")
+    plt.xlabel("n") # nombre de sommets du graphe G
+    plt.ylabel("q(n)") # qualité des solutions (taille du couplage) en fonction du nombre de sommets du graphe G
+    plt.plot(x, y2, color = 'green')
+
+    if (mode > 2) : # Construction et affichage du tracé "nombre de noeuds générés"
+        plt.subplot(3, 1, 3)
+        plt.title("Nombre de noeuds générés dans l'algorithme de branchement en fonction du nombre de sommets n")
+        plt.xlabel("n") # nombre de sommets du graphe G
+        plt.ylabel("c(n)") # nombre de noeuds crées durant le branchement en fonction du nombre de sommets du graphe G
+        plt.plot(x, y3, color = 'red')
+
+    # Sauvegarde du tracé
+    if (save) :
+        plt.savefig("TestResults/" + nomAlgo + "_p=" + str(p) + "_" + str(datetime.date.today()) + str(datetime.datetime.now().strftime("_%H_%M_%S")) + ".jpeg", transparent = True)
+
+    plt.show()
+
+#------------------------------------------------------------------------------------------------------
+
+# Méthode permettant d'afficher le rapport d'approximation de algoCouplage et algoGlouton
+def plotRapportApproximation(nMax, p, mode, verbose = False, save = False):
+    """ nMax : nombre de noeuds maximale pour le graphe
+        p : la probabilité qu'une arete entre 2 sommets soit crée, p E ]0,1[
+        mode : valeur déterminant l'algorithme allant etre utilisé, 1 = algoCouplage ; 2 = algoGlouton
+        verbose : "True" pour afficher le détail des itérations
+        save : "True" pour enregistrer le tracé en format jpg
+    """
+    y = []   # axe des ordonnées : rapport d'approximation des algorithmes couplage et glouton
+    x = []   # axe des abscisses : liste de "nombre de sommets" {1/10 nbIterations, 2/10 nbIterations, ... , nbIterations}
+    
+    # Pour chaque 1/10 de nMax
+    for i in range(1, 11) :
+
+        r = -1
+        res = -1
+
+        # Méthode permettant de générer des graphes aléatoires
+        G = randomGraphe(int(nMax * (i / 10)), p)
+
+        # Calcul du rapport d'approximation r
+        # mode : 1 = algoCouplage ; 2 = algoGlouton
+        if (mode == 1) :
+            res = len(algoCouplage(G))
+        elif (mode == 2) :
+            res = len(algoGlouton(G))
+        else :
+            print("Aucun mode ne correspond à la valeur passée en paramètre. Veuillez choisir une autre valeur de mode.")
+            return
+
+        opt = len(branchement(G))
+
+        if opt != 0 :
+            r = res/opt
+        
+        y.append(r)
+        x.append(int(nMax * (i / 10)))
+
+        if verbose : 
+            print("\nx = ", i, "/10 nMax\n\t\tRapport d'approximation :", r, "\n")
+            print("----------------------------------------------------------------------------------------------\n")
+
+
+    # Affichage graphique
+    plt.figure(figsize = (10, 10))
+    if (mode == 1) :
+        plt.title("Rapport d'approximation de l'algorithme algoCouplage en f(n) avec nMax =" + str(nMax) + " nodes dans le graphe et p = " + str(p) + "\n", color = 'black', size = 15)
+    if (mode == 2) :
+        plt.title("Rapport d'approximation de l'algorithme algoGlouton en f(n) avec nMax =" + str(nMax) + " nodes dans le graphe et p = " + str(p) + "\n", color = 'black', size = 15)
+    plt.rc('xtick', labelsize=10)    # fontsize of the tick labels
+
+    # Construction et affichage du tracé
+    plt.xlabel("n") # nombre de sommets du graphe G
+    plt.ylabel("r") # rapport d'approximation
+    plt.axis([0, nMax, 0, r+1])
+    plt.plot(x, y, color = 'blue')
+
+    # Sauvegarde du tracé
+    if (save) :
+        plt.savefig("TestResults/rapportApproximation_p=" + str(p) + "_" + str(datetime.date.today()) + str(datetime.datetime.now().strftime("_%H_%M_%S")) + ".jpeg", transparent = True)
+
+    plt.show()

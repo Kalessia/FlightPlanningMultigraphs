@@ -8,3 +8,11 @@ Nouvelles :
 - j'ai du remettre la liste d adj dans le format ('a', 1): [(('b', 2), 1), (('a', 2), 0)] (elle etait 'a': [(('b', 2), 1), (('a', 2), 0)]) 
   car contrairement au dictionnaire vertices, qui est bien pratique rangée par sommet du multigraphe, ici j'avais besoin de la source 
   exprimee en format "sommet du graphe" (doublet).
+- j'ai ajoute self.arbreCouvrante = arbreCouvrante # dictionnaire aux attributs de Graphe
+- j'ai adapté BFS, traceback et l algo de l'arrive plus tot au choses dites ce soir (hier)
+- J'ai copie colle 3 fonctions a la fin du fichier partie2, dont on peut s inspirer pour l affichage de graphe et de graphiques. Mais je ne les ai encore pas adaptes.
+
+
+- J'ai perdu un peu de temps a debugger l algo1 (lie a BFS et traceback), mais juste car je me suis fatiguee à un certain moment. J'y suis tres proche.
+  Je les reprends demain, par contre j ai une visite medicale à 9h. Mon programme est donc aller à la visite, rentrer, dormir, reprendre.
+  Seul probleme, je ne sais pas te dire a l avance quand je me reveillerai. A demain apres midi ma chere :*
