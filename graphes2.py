@@ -67,6 +67,51 @@ class Multigraph:
 		print("\tListe de sommets : " + str(self.vertices) )
 		print("\tListe d'arcs : " + str(self.edges) + "\n" )
 
+
+	def randomMultigraphe(n, m, probM, interval_dates):
+		"""
+		"""
+
+
+
+
+
+
+
+
+
+
+
+		lignes = []
+		vertices = []
+		edges = []
+		
+		try:
+			with open(nomFichier, 'r') as fichier:
+				lignes = fichier.readlines()
+		except:
+			print("Erreur : fichier non trouvé")
+			return None
+		
+		
+		n = int(lignes[0])
+		m = int(lignes[1])
+		
+		for i in range(2, len(lignes)):
+			r = re.compile("^[(][\w]*[,][\w]*[,][0-9]*[,][0-9]*[)]\n*$")
+			if r.match(lignes[i]) is not None:
+				# format d'un arc : (source, dest, int(time), int(weight))
+				e = lignes[i].split("(")[1].split(")")[0].split(",")
+				edges.append((e[0], e[1], int(e[2]), int(e[3])))
+				print((e[0], e[1], int(e[2]), int(e[3])))
+			else :
+				vertices.append(lignes[i].split("\n")[0])
+
+		if len(vertices) != n or len(edges) != m :
+			return None
+			
+		return Multigraph(n, m, vertices, edges)
+
 #-------------------------------------------------------------------------------------------------------------------
 
 class Graph:
@@ -573,169 +618,100 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import time
 import datetime
+import time
 
 
 
 #------------------------------------------------------------------------------------------------------
 
 # Méthode permettant d'afficher un graphique de comparaison des performances ("temps de calcul" et "qualité des Solutions") de l'algorithme choisi
-def plotPerformances(p, nbIterations, mode, verbose = False, save = False):
-	# Effectuer  des  tests  pour  mesurer  le  temps  d’ex ́ecution  de  votre  algorithme  parrapport `a la taille de l’entr ́ee 
-	# (nombre de sommets, nombre d’arcs,  ́etiquettes sur les sommets)
-
-    # """ p : la probabilité qu'une arete entre 2 sommets soit crée, p E ]0,1[
-    #     nbIterations : nombre d'éxecutions de l'algorithme, dans le but d'en déduir une performance moyenne
-    #     mode : valeur déterminant l'algorithme allant etre utilisé
-    #     verbose : "True" pour afficher le détail des itérations
-    #     save : "True" pour enregistrer le tracé en format jpg
-    # """
-
-
-
-
-
-
+def plotPerformances(maxN, maxM, probM, maxInterval_dates, nbTests, nbIterations, x, y, interval, verbose = False, save = False):
+	"""
+	"""
+	
+	ordonnee_tGlobal = []  # liste des temps de calcul moyen, vue globale sur le programme
+	ordonnee_tInit = []  # liste des temps de calcul moyen, vue sur l'initialisation (transformation en graphe + calcul d'arbre couvrant)
+	ordonnee_tType1 = []  # liste des temps de calcul moyen, vue sur l'algorithme de type1
+	ordonnee_tType2 = []  # liste des temps de calcul moyen, vue sur l'algorithme de type2
+	ordonnee_tType3 = []  # liste des temps de calcul moyen, vue sur l'algorithme de type3
+	ordonnee_tType4 = []  # liste des temps de calcul moyen, vue sur l'algorithme de type4
+	 
+	abscisse_n = []
+	abscisse_m = []
+	abscisse_interval_dates = []
 
 
+	for nb in range(nbTests):
+
+		n = int(maxN/nbTests*nb)
+		m = int(maxM/nbTests*nb)
+		interval_dates = [ int(maxInterval_dates[0]/nbTests*nb), int(maxInterval_dates[1]/nbTests*nb) ]
+
+		abscisse_n.append(n)
+		abscisse_m.append(m)
+		abscisse_interval_dates.append(interval_dates)
+
+		# Méthode permettant de générer des graphes aléatoires
+		init_tStart = time.time() # init = initialisation programme = transformation en graphe + calcul d'arbre couvrant
+		mg = randomMultigraphe(n, m, probM, interval_dates):
+		g = mg.transform_to_graph()
+		g.BFS(x, y, interval)
+		init_tEnd = time.time()
+		ordonnee_tInit.append(init_tEnd - init_tStart)
+
+		tGlobal = []
+		tInit = []
+		tType1 = []
+		tType2 = []
+		tType3 = []
+		tType4 = []
 
 
+		for ite in range(nbIterations):
 
+			global_tStart = time.time() # global = temps d'execution du programme entier = initialisation + calcul chemins
+			
+			type1_tStart = time.time()
+			type1 = g.earliest_arrival()
+			type1_tEnd = time.time()
 
+			type2_tStart = time.time()
+			type2 = g.latest_departure(x, y, interval)
+			type2_tEnd = time.time()
 
+			type3_tStart = time.time()
+			type3 = g.fastest(x, y, interval)
+			type3_tEnd = time.time()
 
+			type4_tStart = time.time()
+			type4 = g.shortest(x, y, interval)
+			type4_tEnd = time.time()
 
+			global_tEnd = time.time()
 
+			tGlobal.append(global_tEnd - global_tStart)
+			tInit.append(init_tEnd - init_tStart)
+			tType1.append(type1_tEnd - type1_tStart)
+			tType2.append(type2_tEnd - type2_tStart)
+			tType3.append(type3_tEnd - type3_tStart)
+			tType4.append(type4_tEnd - type4_tStart)
 
+			if verbose:
+				print("Temps d'executions rélatifs à l'itération n.", ite, "\n\ttGlobal :", tGlobal, "\n\ttInit :", tInit, "\n\ttType1 :", tType1, "\n\ttType2 :", tType2, "\n\ttType3 :", tType3, "\n\ttType4 :", tType4)
 
+		ordonnee_tGlobal.append( (sum(tGlobal)/len(tGlobal)) )
+		ordonnee_tType1.append( (sum(tType1)/len(tType1)) )
+		ordonnee_tType2.append( (sum(tType2)/len(tType2)) )
+		ordonnee_tType3.append( (sum(tType3)/len(tType3)) )
+		ordonnee_tType4.append( (sum(tType4)/len(tType4)) )
 
-    # Calcul de la taille nMaxAGlouton pour l'algorithme (G)
-    # nMax : taille jusqu'à laquelle l'algorithme tourne rapidement, i.e temps G(nMax,p) < secondesMaxAutorises
-    nMax = 0
-    t = 0
-    while t < secondesMaxAutorises :
-        nMax += 1
-        
-        # Méthode permettant de générer des graphes aléatoires
-        G = randomGraphe(nMax, p)
+		if verbose:
+			print("Temps d'executions moyens rélatifs au test n.", nb, "\n\tordonnee_tGlobal :", ordonnee_tGlobal, "\n\tordonnee_tInit :", ordonnee_tInit, "\n\tordonnee_tType1 :", ordonnee_tType1, "\n\tordonnee_tType2 :", ordonnee_tType2, "\n\tordonnee_tType3 :", ordonnee_tType3, "\n\tordonnee_tType4 :", ordonnee_tType4)
 
-        t1 = time.time()
-
-        # Selection du mode (algorithme allant etre utilisé)
-        if (mode == 1) :
-            res = algoCouplage(G)
-        elif (mode == 2) :
-            res = algoGlouton(G)
-        elif (mode == 3) :
-            res = branchement(G)
-        elif (mode == 4) :
-            res = branchementBornesCouplage(G)
-        elif (mode == 5) :
-            res = branchementOptimiseCouplage(G)
-        elif (mode == 6) :
-            res = branchementOptimiseCouplage_uDegreMax(G)
-        else :
-            print("Aucun mode ne correspond à la valeur passée en paramètre. Veuillez choisir une autre valeur de mode.")
-            return
-
-        t2 = time.time()
-        t = t2-t1
-
-    if verbose :
-        print("nMax = ", nMax, "\n")
-
-    y1 = []  # axe des ordonnées : liste des temps de calcul moyen, pour l'algorithme sélectionné(G)
-    y2 = []  # axe des ordonnées : liste des tailles des couplages (nombre de sommets) moyen, pour l'algorithme sélectionné(G)
-    y3 = []  # axe des ordonnées : liste du nombre de noeuds générés pour l'algorithme de branchement (G)
-    x = []   # axe des abscisses : liste de "nombre de sommets" {1/10 nbIterations, 2/10 nbIterations, ... , nbIterations}
-    
-    # Pour chaque 1/10 de nMax
-    for i in range(1, 11) :
-
-        tabTemps = []
-        moyTemps = 0
-        resAlgo = []
-        moyQualiteSolutions = 0
-        tabNoeudsGeneneres = []
-        moyNbNoeudsGeneres = 0
-        nbNoeuds = 0
-        
-
-        # Pour chacune des nbIterations démandées en paramètre
-        for ite in range(nbIterations):
-
-            # Méthode permettant de générer des graphes aléatoires
-            G = randomGraphe(int(nMax * (i / 10)), p)
-
-            # Execution et recueil statistiques de l'algorithme (G)
-            t1 = time.time()
-
-            # Variable res et noeud permettant de stocker le résultat de l'algorithme et le nombre de noeuds générés
-            
-            # Selection du mode (algorithme allant etre utilisé)
-            if (mode == 1) :
-                res = algoCouplage(G)
-            elif (mode == 2) :
-                res = algoGlouton(G)
-            elif (mode == 3) :
-                res, nbNoeuds = branchement(G)
-            elif (mode == 4) :
-                res, nbNoeuds = branchementBornesCouplage(G)
-            elif (mode == 5) :
-                res, nbNoeuds = branchementOptimiseCouplage(G)
-            elif (mode == 6) :
-                res, nbNoeuds = branchementOptimiseCouplage_uDegreMax(G)
-            else :
-                print("Aucun mode ne correspond à la valeur passée en paramètre. Veuillez choisir une autre valeur de mode.")
-                return
-
-            t2 = time.time()
-            t = t2-t1
-
-            tabTemps.append(t) # temps de calcul de l'algorithme pour l'itération courante
-            resAlgo.append(len(res)) # qualité des solutions pour l'itération courante
-            if (mode > 2) : # Dans le cas ou on utilise un algorithme de branchement
-                tabNoeudsGeneneres.append(nbNoeuds)
-
-            if verbose : 
-                print("x = ", i, "/10 nMax, iteration n.", ite+1, ":", "\n\t\ttabTemps =", tabTemps, "\n\t\tresAlgo =", resAlgo, "\n")
-
-        # Calcul et stockage du temps d'execution moyen et de la qualité des solutions moyenne par rapport aux 'nbIterations' éxecutions
-        moyTemps = sum(tabTemps)/len(tabTemps)
-        moyQualiteSolutions = int(sum(resAlgo)/len(resAlgo))
-        if (mode > 2) :
-            moyNbNoeudsGeneres = int(sum(tabNoeudsGeneneres)/len(tabNoeudsGeneneres))
-        
-
-        y1.append(moyTemps)
-        y2.append(moyQualiteSolutions)
-        if (mode > 2) :
-            y3.append(moyNbNoeudsGeneres)
-        x.append(int(nMax * (i / 10)))
-
-        if verbose : 
-            print("\nx = ", i, "/10 nMax (" + str(int(nbIterations * i/10)) + ") : moyTemps =", moyTemps, "moyQualiteSolutions =", moyQualiteSolutions)
-            print("----------------------------------------------------------------------------------------------\n")
-
-    # Selection du nom de l'algorithme
-    if (mode == 1) :
-        nomAlgo = "algo_Couplage"
-    elif (mode == 2) :
-        nomAlgo = "algo_Glouton"
-    elif (mode == 3) :
-        nomAlgo = "branchement"
-    elif (mode == 4) :
-        nomAlgo = "branchement_Bornes_Couplage"
-    elif (mode == 5) :
-        nomAlgo = "branchement_Optimise_Couplage"
-    elif (mode == 6) :
-        nomAlgo = "branchement_Optimise_Couplage_uDegreMax"
-    else :
-        print("Aucun mode ne correspond à la valeur passée en paramètre. Veuillez choisir une autre valeur de mode.")
-        return
 
     # Affichage graphique
     plt.figure(figsize = (10, 10))
-    plt.suptitle("Performances de l'algorithme " + nomAlgo + " avec nMax =" + str(nMax) + " nodes dans le graphe et p = " + str(p) + "\n", color = 'black', size = 10)
+    plt.suptitle("Performances de l'algorithme")
     plt.rc('xtick', labelsize=10)    # fontsize of the tick labels
 
     # Construction et affichage du tracé "temps de calcul"
@@ -743,94 +719,40 @@ def plotPerformances(p, nbIterations, mode, verbose = False, save = False):
     plt.title("Analyse du temps de calcul en fonction du nombre de sommets n")
     plt.xlabel("n") # nombre de sommets du graphe G
     plt.ylabel("t(n)") # temps de calcul en fonction du nombre de sommets du graphe G
-    plt.plot(x, y1, color = 'blue')
+	plt.plot(abscisse_n, ordonnee_tGlobal, color = 'blue')
+	plt.plot(abscisse_n, ordonnee_tInit, color = 'red')
+	plt.plot(abscisse_n, ordonnee_tType1, color = 'green')
+	plt.plot(abscisse_n, ordonnee_tType2, color = 'yellow')
+	plt.plot(abscisse_n, ordonnee_tType3, color = 'black')
+	plt.plot(abscisse_n, ordonnee_tType4, color = 'pink')
 
-    # Construction et affichage du tracé "qualité des solutions"
     plt.subplot(3, 1, 2)
-    plt.title("Analyse de la qualité des solutions en fonction du nombre de sommets n")
-    plt.xlabel("n") # nombre de sommets du graphe G
-    plt.ylabel("q(n)") # qualité des solutions (taille du couplage) en fonction du nombre de sommets du graphe G
-    plt.plot(x, y2, color = 'green')
+	plt.title("Analyse du temps de calcul en fonction du nombre d'arcs m")
+    plt.xlabel("m") # nombre d'arcs du graphe G
+    plt.ylabel("t(m)") # temps de calcul en fonction du nombre d'arcs du graphe G
+	plt.plot(abscisse_m, ordonnee_tGlobal, color = 'blue')
+	plt.plot(abscisse_m, ordonnee_tInit, color = 'red')
+	plt.plot(abscisse_m, ordonnee_tType1, color = 'green')
+	plt.plot(abscisse_m, ordonnee_tType2, color = 'yellow')
+	plt.plot(abscisse_m, ordonnee_tType3, color = 'black')
+	plt.plot(abscisse_m, ordonnee_tType4, color = 'pink')
 
-    if (mode > 2) : # Construction et affichage du tracé "nombre de noeuds générés"
-        plt.subplot(3, 1, 3)
-        plt.title("Nombre de noeuds générés dans l'algorithme de branchement en fonction du nombre de sommets n")
-        plt.xlabel("n") # nombre de sommets du graphe G
-        plt.ylabel("c(n)") # nombre de noeuds crées durant le branchement en fonction du nombre de sommets du graphe G
-        plt.plot(x, y3, color = 'red')
-
-    # Sauvegarde du tracé
-    if (save) :
-        plt.savefig("TestResults/" + nomAlgo + "_p=" + str(p) + "_" + str(datetime.date.today()) + str(datetime.datetime.now().strftime("_%H_%M_%S")) + ".jpeg", transparent = True)
-
-    plt.show()
-
-#------------------------------------------------------------------------------------------------------
-
-# Méthode permettant d'afficher le rapport d'approximation de algoCouplage et algoGlouton
-def plotRapportApproximation(nMax, p, mode, verbose = False, save = False):
-    """ nMax : nombre de noeuds maximale pour le graphe
-        p : la probabilité qu'une arete entre 2 sommets soit crée, p E ]0,1[
-        mode : valeur déterminant l'algorithme allant etre utilisé, 1 = algoCouplage ; 2 = algoGlouton
-        verbose : "True" pour afficher le détail des itérations
-        save : "True" pour enregistrer le tracé en format jpg
-    """
-    y = []   # axe des ordonnées : rapport d'approximation des algorithmes couplage et glouton
-    x = []   # axe des abscisses : liste de "nombre de sommets" {1/10 nbIterations, 2/10 nbIterations, ... , nbIterations}
-    
-    # Pour chaque 1/10 de nMax
-    for i in range(1, 11) :
-
-        r = -1
-        res = -1
-
-        # Méthode permettant de générer des graphes aléatoires
-        G = randomGraphe(int(nMax * (i / 10)), p)
-
-        # Calcul du rapport d'approximation r
-        # mode : 1 = algoCouplage ; 2 = algoGlouton
-        if (mode == 1) :
-            res = len(algoCouplage(G))
-        elif (mode == 2) :
-            res = len(algoGlouton(G))
-        else :
-            print("Aucun mode ne correspond à la valeur passée en paramètre. Veuillez choisir une autre valeur de mode.")
-            return
-
-        opt = len(branchement(G))
-
-        if opt != 0 :
-            r = res/opt
-        
-        y.append(r)
-        x.append(int(nMax * (i / 10)))
-
-        if verbose : 
-            print("\nx = ", i, "/10 nMax\n\t\tRapport d'approximation :", r, "\n")
-            print("----------------------------------------------------------------------------------------------\n")
-
-
-    # Affichage graphique
-    plt.figure(figsize = (10, 10))
-    if (mode == 1) :
-        plt.title("Rapport d'approximation de l'algorithme algoCouplage en f(n) avec nMax =" + str(nMax) + " nodes dans le graphe et p = " + str(p) + "\n", color = 'black', size = 15)
-    if (mode == 2) :
-        plt.title("Rapport d'approximation de l'algorithme algoGlouton en f(n) avec nMax =" + str(nMax) + " nodes dans le graphe et p = " + str(p) + "\n", color = 'black', size = 15)
-    plt.rc('xtick', labelsize=10)    # fontsize of the tick labels
-
-    # Construction et affichage du tracé
-    plt.xlabel("n") # nombre de sommets du graphe G
-    plt.ylabel("r") # rapport d'approximation
-    plt.axis([0, nMax, 0, r+1])
-    plt.plot(x, y, color = 'blue')
+    plt.subplot(3, 1, 3)
+	plt.title("Analyse du temps de calcul en fonction de l'intervalle de dates choisies interval_dates")
+    plt.xlabel("interval_dates") # nombre de sommets du graphe G
+    plt.ylabel("t(interval_dates)") # temps de calcul en fonction de l'interval de dates choisies du graphe G
+    plt.plot(abscisse_interval_dates, ordonnee_tGlobal, color = 'blue')
+	plt.plot(abscisse_interval_dates, ordonnee_tInit, color = 'red')
+	plt.plot(abscisse_interval_dates, ordonnee_tType1, color = 'green')
+	plt.plot(abscisse_interval_dates, ordonnee_tType2, color = 'yellow')
+	plt.plot(abscisse_interval_dates, ordonnee_tType3, color = 'black')
+	plt.plot(abscisse_interval_dates, ordonnee_tType4, color = 'pink')
 
     # Sauvegarde du tracé
     if (save) :
-        plt.savefig("TestResults/rapportApproximation_p=" + str(p) + "_" + str(datetime.date.today()) + str(datetime.datetime.now().strftime("_%H_%M_%S")) + ".jpeg", transparent = True)
+    	plt.savefig("TestResults/" + str(datetime.date.today()) + str(datetime.datetime.now().strftime("_%H_%M_%S")) + ".jpeg", transparent = True)
 
     plt.show()
-
-
 
 
 
@@ -856,15 +778,16 @@ g = mg.transform_to_graph(True)
 #print("------------------------------------------------------------------")
 
 g.BFS("a", "g", [0, 10], True)
-print("------------------------------------------------------------------")
-
-#earliest_arrival('a', 'g', g, verbose = True)
 #print("------------------------------------------------------------------")
 
-g.showGraphe(titre = "graphe issu du multigraphe")
+#g.showGraphe(titre = "graphe issu du multigraphe")
 #print("------------------------------------------------------------------")
 
 #g.showGrapheCouvrant(titre = "G Couvrant xxx")
 #print("------------------------------------------------------------------")
 
+earliest_arrival('a', 'g', g, verbose = True)
+print("------------------------------------------------------------------")
 
+plotPerformances(10, 10, [1, 30], 15, 2, 'a', 'g', [2, 10], verbose = False, save = False)
+print("------------------------------------------------------------------")
