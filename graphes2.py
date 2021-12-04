@@ -618,7 +618,6 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import time
 import datetime
-import time
 
 
 
@@ -653,7 +652,7 @@ def plotPerformances(maxN, maxM, probM, maxInterval_dates, nbTests, nbIterations
 
 		# Méthode permettant de générer des graphes aléatoires
 		init_tStart = time.time() # init = initialisation programme = transformation en graphe + calcul d'arbre couvrant
-		mg = randomMultigraphe(n, m, probM, interval_dates):
+		mg = randomMultigraphe(n, m, probM, interval_dates)
 		g = mg.transform_to_graph()
 		g.BFS(x, y, interval)
 		init_tEnd = time.time()
@@ -672,19 +671,19 @@ def plotPerformances(maxN, maxM, probM, maxInterval_dates, nbTests, nbIterations
 			global_tStart = time.time() # global = temps d'execution du programme entier = initialisation + calcul chemins
 			
 			type1_tStart = time.time()
-			type1 = g.earliest_arrival()
+			g.earliest_arrival()
 			type1_tEnd = time.time()
 
 			type2_tStart = time.time()
-			type2 = g.latest_departure(x, y, interval)
+			g.latest_departure(x, y, interval)
 			type2_tEnd = time.time()
 
 			type3_tStart = time.time()
-			type3 = g.fastest(x, y, interval)
+			g.fastest(x, y, interval)
 			type3_tEnd = time.time()
 
 			type4_tStart = time.time()
-			type4 = g.shortest(x, y, interval)
+			g.shortest(x, y, interval)
 			type4_tEnd = time.time()
 
 			global_tEnd = time.time()
