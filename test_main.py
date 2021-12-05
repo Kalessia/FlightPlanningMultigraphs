@@ -43,8 +43,10 @@ class MinimalDistanceProblem():
 		"""
 		Static method.
 		Uses visited_tree to find the shortest path between specific_x and specific_y.
-		specific_x: (original_vertex_label, time)
+		x_list: list of possible sources
 		specific_y: (original_vertex_label, time)
+		visited_tree: dictionary containing best predecessors
+		backwards: True if returned path should go from y to x
 		"""
 
 		# if specific_x == None or specific_y == None:
@@ -61,15 +63,15 @@ class MinimalDistanceProblem():
 		path = [specific_y]
 
 		while (parent != None):
+			
 			path.append(parent)
-
-			if parent in x_list: 
+			if parent in x_list: # a path was found
 				break
 
 			child = parent
 			parent = visited_tree[child]
 		
-		if parent == None:
+		if parent == None: # reached the root without finding a path
 			return []
 
 		if not(backwards):
@@ -82,7 +84,7 @@ class MinimalDistanceProblem():
 
 	def earliest_arrival(self, verbose=False):
 		"""
-		Returns the path from x to y which arrives the earliest.
+		Returns a path from x to y which arrives the earliest.
 
 		"""
 
@@ -101,18 +103,18 @@ class MinimalDistanceProblem():
 
 		for specific_y in y_list:
 			path = self.traceback(x_list, specific_y, self.visited_tree) # specific_y est le sommet contenant y dans l'etiquette pas encore testé avec t minimale
-			if path != None:
+			if len(path) > 0:
 				if verbose:
 					print("Chemin d’arrivée au plus tôt de x à y :", path)
 				return path
 
 		if verbose:
-			print("Il n'existe aucun chemin de x à y")	
-		return None
+			print("Il n'existe aucun chemin de x à y.")	
+		return []
 
 	def latest_departure(self, verbose=False):
 		"""
-		Returns the path from x to y which leaves the latest.
+		Returns a path from x to y which leaves the latest.
 
 		"""
 		
@@ -123,23 +125,17 @@ class MinimalDistanceProblem():
 
 		x_list = self.g.vertices[self.x]
 		y_list = self.g.vertices[self.y]
-
-		# Pour chaque sommet dans la liste y_list, vérifier s'il existe un chemin de x à y en remontant le sens des arcs de G’.
 		
-		best_path = []
-		best_time = 0
-
-		for specific_x in x_list:
+		for specific_x in reversed(x_list): # x triés par ordre décroissant
 			path = self.traceback(y_list, specific_x, visited_tree, backwards=True) # specific_y est le sommet contenant y dans l'etiquette pas encore testé avec t minimale
 			if len(path) > 0:
-				label, time = path[0]
-				if time > best_time:
-					best_time = time
-					best_path = path
+				if verbose:
+					print("Chemin d’arrivée au plus tôt de x à y :", path)
+				return path
 
 		if verbose:
-			print("Chemin de départ le plus tard de x à y :", best_path)
-		return best_path
+			print("Il n'existe aucun chemin de x à y.")
+		return []
 
 	def fastest(self):
 		
@@ -148,6 +144,10 @@ class MinimalDistanceProblem():
 		return path
 
 	def shortest(self):
+		"""
+		Returns a path from x to y for which the sum of the arc weights is minimal.
+
+		"""
 
 		visited_tree, specific_y = self.g.Dijkstra(self.x, self.y, self.interval)
 
