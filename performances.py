@@ -1,6 +1,6 @@
 from multigraph import Multigraph
 from graph import Graph
-from test_main import MinimalDistanceProblem as mdp
+#from test_main import MinimalDistanceProblem as mdp
 
 import time
 import datetime
