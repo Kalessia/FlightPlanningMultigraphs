@@ -181,6 +181,30 @@ class MinimalDistanceProblem():
 
 		return self.traceback(self.g.vertices[self.x], specific_y, visited_tree)
 
+	def show_visited_tree(self, visited_tree, title = "Visited tree"):
+		""" G : un dictionnaire representant un graphe { sommet s : sommets adjacents à s}
+		    titre : titre du graphe à afficher, 'G' par defaut
+		"""
+
+		newG = nx.DiGraph()
+		vertices = list(visited_tree.keys())
+		newG.add_nodes_from(vertices)
+
+		for successor in self.visited_tree.keys():
+			if self.visited_tree[successor] == None:
+				continue
+			else:
+				newG.add_edge(self.visited_tree[successor], successor)
+
+		plt.title(title)
+		nx.draw(newG, with_labels=True, node_size=1500, node_color="skyblue")
+
+		toPdot = nx.drawing.nx_pydot.to_pydot
+		pdot = toPdot(newG)
+		pdot.write_png("VisitedTree.png")
+
+		plt.show()
+
 # -------- MAIN -------- #
 
 def main():

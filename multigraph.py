@@ -1,5 +1,5 @@
 import operator
-
+import networkx as nx
 from graph import Graph
 
 class Multigraph:
@@ -13,7 +13,7 @@ class Multigraph:
 
 	def __str__(self):
 
-		return "\nGraph with"+n+"vertices and"+m+"edges:\n\nVertices: "+str(self.vertices)+"\n\nEdges: "+str(self.edges)
+		return "\nMultigraph with"+n+"vertices and"+m+"edges:\n\nVertices: "+str(self.vertices)+"\n\nEdges: "+str(self.edges)
 
 	def transform_to_graph(self):
 		"""
@@ -53,3 +53,31 @@ class Multigraph:
 				newEdges.append(e)
 
 		return Graph(self.n, self.m, newVertices, newEdges)
+
+		# Méthode permettant d'afficher à l'écran un multigraphe orienté et, éventuellement, un titre
+	def show(self, title = "Multigraph"):
+		""" G : un dictionnaire representant un graphe { sommet s : sommets adjacents à s}
+		    titre : titre du graphe à afficher, 'G' par defaut
+		"""
+
+		newG = nx.MultiDiGraph()
+		newG.add_nodes_from(self.vertices)
+
+		for source, dest, t, w in self.edges:
+			newG.add_edge(source, dest, weight=t)
+
+		plt.title(title)
+		pos = nx.circular_layout(newG)
+		e_labels = nx.get_edge_attributes(newG, 'weight')
+		nx.draw_networkx(newG, pos=pos, arrows=True, with_labels=True)
+		nx.draw_networkx_edge_labels(newG, pos = pos, label_pos=0.5, font_size=10)
+		
+		toPdot = nx.drawing.nx_pydot.to_pydot
+		pdot = toPdot(newG)
+		# nx.draw(newG, edges_labels=True)
+
+		pdot.write_png("Multigraph.png")
+		plt.show()
+		
+		# nx.draw_networkx_edge_labels(newG, pos=pos, edge_labels=e_labels)
+		# nx.draw(newG, with_labels=True, node_size=1500, pos=pos)

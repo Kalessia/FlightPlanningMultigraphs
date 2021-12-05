@@ -1,4 +1,5 @@
 import heapq
+import networkx as nx
 
 class Graph:
 
@@ -16,7 +17,6 @@ class Graph:
 		Returns an adjacency list (dictionary).
 		"""
 
-		# Construction du dictionnaire adjacency_list[key=source][val=destination, poids]
 		adjacency_list = {}
 		backwards_adjacency_list = {}
 
@@ -25,7 +25,8 @@ class Graph:
 			for vertex in v_list:
 				adjacency_list[vertex] = []
 				backwards_adjacency_list[vertex] = []
-
+		
+		# adjacency_list[key=source][val=(destination, weight)]
 		for source, dest, weight in edges :
 			adjacency_list[source].append((dest, weight))
 			backwards_adjacency_list[dest].append((source, weight))
@@ -45,6 +46,10 @@ class Graph:
 		Returns the visited tree between x and y.
 
 		Assumption: no cycles in the graph.
+
+		x: vertex in original (multi)graph
+		y: vertex in original (multi)graph
+		backwards: True if building tree from destination (x: destination, y: source)
 		"""
 
 		if backwards:
@@ -60,19 +65,19 @@ class Graph:
 
 		if x_list[-1][1] < t_alpha or x_list[0][1] > t_omega or y_list[-1][1] < t_alpha or y_list[0][1] > t_omega:
 			print("Aucun trajet possible entre x et y dans l'intervalle selectionné.")
-			return visited_tree # commentaire à retirer: je retourne un dict vide pour pas poser de problèmes dans les algos suivants, on retournera un chemin vide comme il n'y a aucun chemin possible
+			return visited_tree 
 
 		root = None
 
 		if backwards:
 			for vertex, time in reversed(x_list): 
 				if time <= t_omega:
-					root = (vertex, time) # sommet source contenant l'etiquette x et la plus petite date
+					root = (vertex, time) # root: vertex labeled with x which has the latest time
 					break
 		else:
 			for vertex, time in x_list: 
 				if time >= t_alpha:
-					root = (vertex, time) # sommet source contenant l'etiquette x et la plus petite date
+					root = (vertex, time) # root: vertex labeled with x which has the earliest time
 					break
 		if verbose:
 			print("[BFS] Racine:", root)
@@ -80,9 +85,9 @@ class Graph:
 		# To allow early exit [Optional (worth it if total nb of vertices >> len(path to y))]
 		for vertex, time in y_list:
 			if time < t_alpha or time > t_omega:
-				y_list.remove((vertex, time))
+				y_list.remove((vertex, time)) # Keeps (y, t) only if t is within interval
 		
-		queue = [root]	# Initialisation de la file avec le sommet source x
+		queue = [root]
 		visited_tree[root] = None
 
 		while (len(queue) > 0 and len(y_list) > 0): # complexity of len() in python : O(1), in other languages use counter to optimise
@@ -90,7 +95,7 @@ class Graph:
 			if verbose:
 				print("\n[BFS] Etat de la file :", queue)
 				print("[BFS] Sommet à traiter :", current_v)
-			if current_v in self.adjacency_list.keys(): # Erreur impossible ? et si possible la détecter plus tôt ?
+			if current_v in self.adjacency_list.keys():
 				for successor, weight in adjacency_list[current_v]:
 					if verbose:
 						print("\tSuccesseur :", successor)
@@ -124,13 +129,13 @@ class Graph:
 
 		for vertex, time in x_list: 
 			if time >= t_alpha:
-				root = (vertex, time) # sommet source contenant l'etiquette x et la plus petite date
+				root = (vertex, time) # root: vertex labeled with x which has the earliest time
 				break
 
 		if verbose:
 			print("[Dijkstra] Racine:", root)
 
-		priorityQ = [(0, root)]	# Initialisation de la file avec le sommet source x
+		priorityQ = [(0, root)]
 		visited_tree[root] = None
 		cost_so_far = {}
 		cost_so_far[root] = 0
@@ -142,7 +147,7 @@ class Graph:
 			if verbose:
 				print("\n[Dijkstra] Etat de la file :", priorityQ)
 				print("[Dijkstra] Sommet à traiter :", current_v)
-			if current_v in self.adjacency_list.keys(): # Erreur impossible ? et si possible la détecter plus tôt ?
+			if current_v in self.adjacency_list.keys():
 				for successor, weight in self.adjacency_list[current_v]:
 					new_cost = cost_so_far[current_v] + weight
 					if verbose:
@@ -160,3 +165,30 @@ class Graph:
 		print("\n[Dijkstra] visited_tree :", visited_tree, "\n")
 
 		return visited_tree, successor
+
+
+	# Méthode permettant d'afficher à l'écran un graphe orienté et, éventuellement, un titre
+	def show(self, title = "Graph"):
+		""" G : un dictionnaire representant un graphe { sommet s : sommets adjacents à s}
+		    titre : titre du graphe à afficher, 'G' par defaut
+		"""
+
+		newG = nx.DiGraph()
+		vertices = list(self.adjacency_list.keys())
+		newG.add_nodes_from(vertices)
+
+		for source in vertices:
+			for dest, w in self.adjacency_list[source]:
+				newG.add_edge(source, dest, weight=w)
+
+		plt.title(title)
+		pos = nx.circular_layout(newG)
+		e_labels = nx.get_edge_attributes(newG, 'weight')
+		nx.draw_networkx_edge_labels(newG, pos=pos, edge_labels=e_labels)
+		nx.draw(newG, with_labels=True, node_size=1500, pos=pos)
+
+		toPdot = nx.drawing.nx_pydot.to_pydot
+		pdot = toPdot(newG)
+		pdot.write_png("Graph.png")
+
+		plt.show()
