@@ -1,5 +1,6 @@
 import sys
 import re
+from itertools import combinations
 
 from multigraph import Multigraph 
 from graph import Graph
@@ -130,16 +131,39 @@ class MinimalDistanceProblem():
 			path = self.traceback(y_list, specific_x, visited_tree, backwards=True) # specific_y est le sommet contenant y dans l'etiquette pas encore testé avec t minimale
 			if len(path) > 0:
 				if verbose:
-					print("Chemin d’arrivée au plus tôt de x à y :", path)
+					print("Chemin de départ au plus tard de x à y :", path)
 				return path
 
 		if verbose:
 			print("Il n'existe aucun chemin de x à y.")
 		return []
 
-	def fastest(self):
+	def fastest(self, verbose=False):
+
+		if self.x == self.y:
+			return [x]
 		
-		path = []
+		x_list = self.g.vertices[self.x]
+		y_list = self.g.vertices[self.y]
+
+		combinations = [(x,y) for x in x_list for y in y_list]
+		combinations.sort(key=lambda tup: tup[1][1]-tup[0][1]) # sorts in place by duration: t(y) - t(x)
+
+		# Removes t(y) - t(x) <= 0 as they are impossible
+		while combinations[0][1][1] - combinations[0][0][1] <= 0:
+			combinations.pop(0)
+
+		for c in combinations:
+			for specific_x, specific_y in combinations:
+				path = self.traceback([specific_x], specific_y, self.visited_tree) # specific_y est le sommet contenant y dans l'etiquette pas encore testé avec t minimale
+			if len(path) > 0:
+				if verbose:
+					print("Chemin de plus courte durée :", path)
+				return path
+
+		if verbose:
+			print("Il n'existe aucun chemin de x à y.")	
+		return []
 
 		return path
 
@@ -189,7 +213,8 @@ def main():
 	print("Chemin de type I (Arrivée le plus tôt) :", type1)
 	type2 = p.latest_departure()
 	print("Chemin de type II (Départ le plus tard) :", type2)
-	# type3 = g.fastest(x, y, interval)
+	type3 = p.fastest()
+	print("Chemin de type III (Chemin le plus rapide) :", type3)
 	type4 = p.shortest()
 	print("Chemin de type IV (Chemin le plus court) :", type4)
 
