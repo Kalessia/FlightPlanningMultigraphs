@@ -4,6 +4,7 @@ from itertools import combinations
 
 from multigraph import Multigraph 
 from graph import Graph
+from gurobi_type4 import shortest_PL as pl
 
 # -------- UTILS -------- #
 
@@ -185,6 +186,11 @@ class MinimalDistanceProblem():
 
 		return self.traceback(self.g.vertices[self.x], specific_y, visited_tree)
 
+	def shortest_gurobi(self):
+		res = pl(self.adjacency_list)
+		# boucler pour enterpreter le resultat
+
+
 	def show_visited_tree(self, visited_tree, title = "Visited tree"):
 		""" G : un dictionnaire representant un graphe { sommet s : sommets adjacents à s}
 		    titre : titre du graphe à afficher, 'G' par defaut
@@ -248,5 +254,7 @@ def main():
 	print("Chemin de type III (Chemin le plus rapide) :", type3)
 	type4 = p.shortest()
 	print("Chemin de type IV (Chemin le plus court) :", type4)
+	type4_gurobi = p.shortest_gurobi()
+	print("Chemin de type IV (Chemin le plus court) calculé avec PL :", type4_gurobi)
 
 main()
