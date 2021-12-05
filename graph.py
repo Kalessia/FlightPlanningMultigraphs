@@ -64,7 +64,7 @@ class Graph:
 		y_list = self.vertices[y].copy()
 
 		if x_list[-1][1] < t_alpha or x_list[0][1] > t_omega or y_list[-1][1] < t_alpha or y_list[0][1] > t_omega:
-			print("Aucun trajet possible entre x et y dans l'intervalle selectionné.")
+			print("[BFS] Aucun trajet possible entre x et y dans l'intervalle selectionné.")
 			return visited_tree 
 
 		root = None
@@ -123,7 +123,7 @@ class Graph:
 
 		if x_list[-1][1] < t_alpha or x_list[0][1] > t_omega or y_list[-1][1] < t_alpha or y_list[0][1] > t_omega:
 			print("Aucun trajet possible entre x et y dans l'intervalle selectionné.")
-			return visited_tree
+			return visited_tree, ("null", -1)
 
 		root = None
 

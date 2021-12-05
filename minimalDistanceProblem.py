@@ -154,6 +154,7 @@ class MinimalDistanceProblem():
 
 		visited_tree, specific_y = self.g.Dijkstra(self.x, self.y, self.interval)
 
+
 		label, time = specific_y
 		if label != self.y:
 			return []
