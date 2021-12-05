@@ -6,10 +6,17 @@
 from gurobipy import *
 
 
-def shortest_PL(nbcont, nbvar, adjacency_list):
+def shortest_LP(adjacency_list):
 
     nbcont = 4 
     nbvar = 2
+
+    arc_list = []
+
+    for source in adjacency_list.keys():
+        dest, weight = adjacency_list[v]
+
+
 
     # Range of plants and warehouses
     lignes = range(nbcont)

@@ -1,6 +1,6 @@
 from multigraph import Multigraph
 from graph import Graph
-#from test_main import MinimalDistanceProblem as mdp
+from minimalDistanceProblem import MinimalDistanceProblem as mdp
 
 import time
 import datetime
@@ -159,6 +159,7 @@ def plotPerformances(maxN, maxM, maxInterval_dates, nbTests, nbIterations, x, y,
 		# Méthode permettant de générer des graphes aléatoires
 		init_tStart = time.time() # init = initialisation programme = transformation en graphe + calcul d'arbre couvrant
 		mg = randomMultigraphe(n, m, interval_dates)
+        print(mg)
 		g = mg.transform_to_graph()
 		g.BFS(x, y, interval)
 		init_tEnd = time.time()
@@ -269,8 +270,7 @@ def plotPerformances(maxN, maxM, maxInterval_dates, nbTests, nbIterations, x, y,
 
 def performances():
 
-    print("ici")
-    maxN = 10
+    maxN = 1
     maxM = 30
     maxInterval_dates = [0, 10]
     nbTests = 10

@@ -1,6 +1,8 @@
 import operator
 import networkx as nx
 from graph import Graph
+import matplotlib.pyplot as plt
+
 
 class Multigraph:
 
