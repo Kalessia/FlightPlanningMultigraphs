@@ -7,8 +7,8 @@ from gurobipy import *
 
 
 
-nbcont=4 
-nbvar=2
+nbcont = 4 
+nbvar = 2
 
 # Range of plants and warehouses
 lignes = range(nbcont)
@@ -27,7 +27,7 @@ b = [8, 6, 15, 18]
 c = [4, 10]
 
 m = Model("mogplex")     
-        
+
 # declaration variables de decision
 x = []
 for i in colonnes:
@@ -40,7 +40,7 @@ obj = LinExpr();
 obj = 0
 for j in colonnes:
     obj += c[j] * x[j]
-        
+
 # definition de l'objectif
 m.setObjective(obj, GRB.MAXIMIZE)
 

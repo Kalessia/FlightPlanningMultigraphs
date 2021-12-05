@@ -21,10 +21,13 @@ def readInterval():
 
 def parseMultigraph():
 	
-	n = readint()
-	m = readint()
-	vertices = [readstr() for _ in range(n)]
-	edges = [readEdge() for _ in range(m)]
+	try:
+		n = readint()
+		m = readint()
+		vertices = [readstr() for _ in range(n)]
+		edges = [readEdge() for _ in range(m)] # catch error if not enough lines
+	except ValueError:
+		print("Format d'entrée non respecté, veuillez vérifier vos données.")
 
 	return Multigraph(n, m, vertices, edges)
 
@@ -39,6 +42,7 @@ class MinimalDistanceProblem():
 		self.y = y
 		self.interval = interval # closed interval
 		self.visited_tree = g.BFS(x, y, interval) # contains best predecessors
+		self.backwards_visited_tree = g.BFS(x, y, interval, backwards=True)
 
 	def traceback(self, x_list, specific_y, visited_tree, backwards=False, verbose=False):
 		"""
@@ -54,9 +58,11 @@ class MinimalDistanceProblem():
 		# 	return []
 		
 		if specific_y not in visited_tree.keys():
-		 	return []
+			print("La destination n'était pas atteignable à partir de x.")
+			return []
 
 		if not(bool(visited_tree)):
+			print("L'arbre couvrant est ")
 			return []
 
 		child = specific_y
@@ -122,13 +128,11 @@ class MinimalDistanceProblem():
 		if self.x == self.y:
 			return [x]
 
-		visited_tree = self.g.BFS(self.y, self.x, self.interval, backwards=True)
-
 		x_list = self.g.vertices[self.x]
 		y_list = self.g.vertices[self.y]
 		
 		for specific_x in reversed(x_list): # x triés par ordre décroissant
-			path = self.traceback(y_list, specific_x, visited_tree, backwards=True) # specific_y est le sommet contenant y dans l'etiquette pas encore testé avec t minimale
+			path = self.traceback(y_list, specific_x, self.backwards_visited_tree, backwards=True) # specific_y est le sommet contenant y dans l'etiquette pas encore testé avec t minimale
 			if len(path) > 0:
 				if verbose:
 					print("Chemin de départ au plus tard de x à y :", path)
@@ -215,12 +219,13 @@ def main():
 	mg = parseMultigraph()
 
 	if mg == None:
+		print("Erreur ")
 		return
 
 	print("Le graph a été parsé sans erreur.")
 
 	print("Veuillez entrer le sommet de départ : ")
-	x = readstr()
+	x = readstr() # test si sommet n'existe pas
 	print("Veuillez entrer le sommet d'arrivée : ")
 	y = readstr()
 	print("Veuillez entrer l'intervalle dans lequel le trajet est effectué : ")
@@ -231,6 +236,8 @@ def main():
 	print(g)
 
 	p = MinimalDistanceProblem(g, x, y, interval)
+	if p.visited_tree == {} or p.backwards_visited_tree == {}:
+		print("Aucun chemin existe pour les ")
 
 	print("Calcul des chemins minimaux...")
 	type1 = p.earliest_arrival()

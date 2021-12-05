@@ -20,6 +20,8 @@ class Multigraph:
 		Returns a simple graph.
 		"""
 
+		# TODO: Tester si ça marche avec des arbres non connexes
+
 		newVertices = {} # {original_vertex : list of new vertices}
 		newEdges = []
 
@@ -54,7 +56,7 @@ class Multigraph:
 
 		return Graph(self.n, self.m, newVertices, newEdges)
 
-		# Méthode permettant d'afficher à l'écran un multigraphe orienté et, éventuellement, un titre
+	# Méthode permettant d'afficher à l'écran un multigraphe orienté et, éventuellement, un titre
 	def show(self, title = "Multigraph"):
 		""" G : un dictionnaire representant un graphe { sommet s : sommets adjacents à s}
 		    titre : titre du graphe à afficher, 'G' par defaut
