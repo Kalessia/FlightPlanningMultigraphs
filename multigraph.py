@@ -17,6 +17,11 @@ class Multigraph:
 
 		return "\nMultigraph with "+str(self.n)+" vertices and "+str(self.m)+" edges:\n\nVertices: "+str(self.vertices)+"\n\nEdges: "+str(self.edges)+"\n"
 
+	def printMultigraphe(self):
+		print("\nMultigraph de " + str(self.n) + " sommets et " + str(self.m) + " arcs :")
+		print("\tListe de sommets : " + str(self.vertices) )
+		print("\tListe d'arcs : " + str(self.edges) + "\n" )
+
 	def transform_to_graph(self):
 		"""
 		Returns a simple graph.

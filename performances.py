@@ -8,6 +8,7 @@ import datetime
 from math import floor, ceil 
 import random
 import scipy.stats as st
+import numpy as np
 
 import matplotlib.pyplot as plt
 
@@ -131,23 +132,18 @@ def randomMultigraphe(n, m, interval_dates):
 
 # Méthode permettant d'afficher un graphique de comparaison des performances ("temps de calcul" et "qualité des Solutions") de l'algorithme choisi
 def plotPerformances(maxN, maxM, maxInterval_dates, nbTests, nbIterations, x, y, interval, save = False):
-	"""
-	"""
-	
 	ordonnee_tGlobal = []  # liste des temps de calcul moyen, vue globale sur le programme
 	ordonnee_tInit = []  # liste des temps de calcul moyen, vue sur l'initialisation (transformation en graphe + calcul d'arbre couvrant)
 	ordonnee_tType1 = []  # liste des temps de calcul moyen, vue sur l'algorithme de type1
 	ordonnee_tType2 = []  # liste des temps de calcul moyen, vue sur l'algorithme de type2
 	ordonnee_tType3 = []  # liste des temps de calcul moyen, vue sur l'algorithme de type3
 	ordonnee_tType4 = []  # liste des temps de calcul moyen, vue sur l'algorithme de type4
-	 
 	abscisse_n = []
 	abscisse_m = []
 	abscisse_interval_dates = []
-
+	
 
 	for nb in range(nbTests):
-
 		n = int(maxN/nbTests*nb)
 		m = int(maxM/nbTests*nb)
 		interval_dates = [ int(maxInterval_dates[0]/nbTests*nb), int(maxInterval_dates[1]/nbTests*nb) ]
@@ -159,7 +155,8 @@ def plotPerformances(maxN, maxM, maxInterval_dates, nbTests, nbIterations, x, y,
 		# Méthode permettant de générer des graphes aléatoires
 		init_tStart = time.time() # init = initialisation programme = transformation en graphe + calcul d'arbre couvrant
 		mg = randomMultigraphe(n, m, interval_dates)
-        print(mg)
+		mg.printMultigraphe()
+
 		g = mg.transform_to_graph()
 		g.BFS(x, y, interval)
 		init_tEnd = time.time()
@@ -270,7 +267,7 @@ def plotPerformances(maxN, maxM, maxInterval_dates, nbTests, nbIterations, x, y,
 
 def performances():
 
-    maxN = 1
+    maxN = 10
     maxM = 30
     maxInterval_dates = [0, 10]
     nbTests = 10
@@ -280,7 +277,8 @@ def performances():
     interval = [0, 10]
     save = False
     
-    plotPerformances(maxN, maxM, maxInterval_dates, nbTests, nbIterations, x, y, interval, save)
-    
+    #plotPerformances(maxN, maxM, maxInterval_dates, nbTests, nbIterations, x, y, interval, save)
+    mg = randomMultigraphe(10, 30, maxInterval_dates)
+	print(mg)
 
 performances()
