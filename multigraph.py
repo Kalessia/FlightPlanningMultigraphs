@@ -1,6 +1,8 @@
 import operator
 import networkx as nx
 from graph import Graph
+import matplotlib.pyplot as plt
+
 
 class Multigraph:
 
@@ -13,7 +15,7 @@ class Multigraph:
 
 	def __str__(self):
 
-		return "\nMultigraph with"+n+"vertices and"+m+"edges:\n\nVertices: "+str(self.vertices)+"\n\nEdges: "+str(self.edges)
+		return "\nMultigraph with"+str(self.n)+"vertices and"+str(self.m)+"edges:\n\nVertices: "+str(self.vertices)+"\n\nEdges: "+str(self.edges)
 
 	def transform_to_graph(self):
 		"""
