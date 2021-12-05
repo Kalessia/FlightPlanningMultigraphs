@@ -1,3 +1,5 @@
+import heapq
+
 class Graph:
 
 	def __init__(self, n, m, vertices, edges):
@@ -108,4 +110,76 @@ class Graph:
 		"""
 		"""
 
-		pass
+		t_alpha, t_omega = interval
+		x_list = self.vertices[x]
+		y_list = self.vertices[y].copy()
+
+		if x_list[-1][1] < t_alpha or x_list[0][1] > t_omega or y_list[-1][1] < t_alpha or y_list[0][1] > t_omega:
+			print("Aucun trajet possible entre x et y dans l'intervalle selectionné.")
+			return visited_tree # commentaire à retirer: je retourne un dict vide pour pas poser de problèmes dans les algos suivants, on retournera un chemin vide comme il n'y a aucun chemin possible
+
+		root = None
+
+		if backwards:
+			for vertex, time in reversed(x_list): 
+				if time <= t_omega:
+					root = (vertex, time) # sommet source contenant l'etiquette x et la plus petite date
+					break
+		else:
+			for vertex, time in x_list: 
+				if time >= t_alpha:
+					root = (vertex, time) # sommet source contenant l'etiquette x et la plus petite date
+					break
+		if verbose:
+			print("[Dijkstra] Racine:", root)
+
+		# To allow early exit [Optional (worth it if total nb of vertices >> len(path to y))]
+		for vertex, time in y_list:
+			if time < t_alpha or time > t_omega:
+				y_list.remove((vertex, time))
+		
+		priorityQ = [time, vertex]	# Initialisation de la file avec le sommet source x
+		visited_tree[root] = None
+		cost_so_far = {}
+		cost_so_far[root]
+
+		while (len(priorityQ) > 0 and len(y_list) > 0): # complexity of len() in python : O(1), in other languages use counter to optimise
+			time, label = heapq.heappop(priorityQ)
+			current_v = (label, time)
+			if verbose:
+				print("\n[Dijkstra] Etat de la file :", priorityQ)
+				print("[Dijkstra] Sommet à traiter :", current_v)
+			if current_v in self.adjacency_list.keys(): # Erreur impossible ? et si possible la détecter plus tôt ?
+				for successor, weight in adjacency_list[current_v]:
+					new_cost = cost_so_far[current_v] + weight
+					if verbose:
+						print("\tSuccesseur :", successor)
+					if successor not in visited_tree:
+						heapq.heappush(priorityQ, (weight, successor))
+						visited_tree[successor] = current_v
+
+						label, time = successor
+						if label == y:
+							y_list.remove(successor) # to allow early exit
+
+		print("\n[Dijkstra] visited_tree :", visited_tree, "\n")
+
+		return visited_tree, cost
+
+frontier = Queue()
+frontier.put(start)
+came_from = dict()
+came_from[start] = None
+
+while not frontier.empty():
+   current = frontier.get()
+
+   if current == goal: 
+
+
+      break           
+
+   for next in graph.neighbors(current):
+      if next not in came_from:
+         frontier.put(next)
+         came_from[next] = current
