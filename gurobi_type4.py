@@ -4,21 +4,31 @@
 
 
 from gurobipy import *
+import pandas as pd
 
 
-def shortest_LP(adjacency_list):
+def shortest_LP(m, edges, adjacency_list):
 
-    nbcont = 4 
-    nbvar = 2
+    nbcont = 0
+    nbvar = m
 
-    arc_list = []
+    coefficients = []
+    variables = edges
+    constraints = []
 
-    for source in adjacency_list.keys():
-        dest, weight = adjacency_list[v]
+    for i in range(m):
+
+        source, dest, weight = edges[i]
+        coefficients.append(weight)
+
+        c = np.zeros(nbvar)
+        
+        for successor in adjacency_list[dest]:
+            c[]
 
 
 
-    # Range of plants and warehouses
+
     lignes = range(nbcont)
     colonnes = range(nbvar)
 
@@ -30,9 +40,6 @@ def shortest_LP(adjacency_list):
 
     # Second membre
     b = [8, 6, 15, 18]
-
-    # Coefficients de la fonction objectif
-    c = [4, 10]
 
     m = Model("mogplex")     
 

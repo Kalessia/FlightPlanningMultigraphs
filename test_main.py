@@ -10,7 +10,7 @@ def main():
 	try:
 
 		mg = parse_multigraph()
-
+		print(mg)
 		print("Le graph a été parsé sans erreur.")
 
 		print("Graphe en cours de transformation...")

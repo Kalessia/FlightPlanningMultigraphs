@@ -69,3 +69,10 @@ En tout cas faire en sorte que la valeur du VERBOSE soit rentré une seule fois 
 #####################################################################################################################
 
 - Verifier si il y a des divisions par 0 à gerer dans plotPerformances
+
+#####################################################################################################################
+
+- n et m dans Graph sont actuellement les n et m du Multigraph original. Changer ?
+
+#####################################################################################################################
+
