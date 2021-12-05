@@ -1,146 +1,20 @@
-from multigraph import Multigraph 
+from multigraph import Multigraph
 from graph import Graph
+from test_main import MinimalDistanceProblem as mdp
 
+import time
+import datetime
 
-# Méthode permettant d'afficher un graphique de comparaison des performances ("temps de calcul" et "qualité des Solutions") de l'algorithme choisi
-def plotPerformances(maxN, maxM, maxInterval_dates, nbTests, nbIterations, x, y, interval, verbose = False, save = False):
-	"""
-	"""
-	
-	ordonnee_tGlobal = []  # liste des temps de calcul moyen, vue globale sur le programme
-	ordonnee_tInit = []  # liste des temps de calcul moyen, vue sur l'initialisation (transformation en graphe + calcul d'arbre couvrant)
-	ordonnee_tType1 = []  # liste des temps de calcul moyen, vue sur l'algorithme de type1
-	ordonnee_tType2 = []  # liste des temps de calcul moyen, vue sur l'algorithme de type2
-	ordonnee_tType3 = []  # liste des temps de calcul moyen, vue sur l'algorithme de type3
-	ordonnee_tType4 = []  # liste des temps de calcul moyen, vue sur l'algorithme de type4
-	 
-	abscisse_n = []
-	abscisse_m = []
-	abscisse_interval_dates = []
-
-
-	for nb in range(nbTests):
-
-		n = int(maxN/nbTests*nb)
-		m = int(maxM/nbTests*nb)
-		interval_dates = [ int(maxInterval_dates[0]/nbTests*nb), int(maxInterval_dates[1]/nbTests*nb) ]
-
-		abscisse_n.append(n)
-		abscisse_m.append(m)
-		abscisse_interval_dates.append(interval_dates)
-
-		# Méthode permettant de générer des graphes aléatoires
-		init_tStart = time.time() # init = initialisation programme = transformation en graphe + calcul d'arbre couvrant
-		mg = randomMultigraphe(n, m, probM, interval_dates)
-		g = mg.transform_to_graph()
-		g.BFS(x, y, interval)
-		init_tEnd = time.time()
-		ordonnee_tInit.append(init_tEnd - init_tStart)
-
-		tGlobal = []
-		tInit = []
-		tType1 = []
-		tType2 = []
-		tType3 = []
-		tType4 = []
-
-
-		for ite in range(nbIterations):
-
-			global_tStart = time.time() # global = temps d'execution du programme entier = initialisation + calcul chemins
-			
-			type1_tStart = time.time()
-			g.earliest_arrival()
-			type1_tEnd = time.time()
-
-			type2_tStart = time.time()
-			g.latest_departure(x, y, interval)
-			type2_tEnd = time.time()
-
-			type3_tStart = time.time()
-			g.fastest(x, y, interval)
-			type3_tEnd = time.time()
-
-			type4_tStart = time.time()
-			g.shortest(x, y, interval)
-			type4_tEnd = time.time()
-
-			global_tEnd = time.time()
-
-			tGlobal.append(global_tEnd - global_tStart)
-			tInit.append(init_tEnd - init_tStart)
-			tType1.append(type1_tEnd - type1_tStart)
-			tType2.append(type2_tEnd - type2_tStart)
-			tType3.append(type3_tEnd - type3_tStart)
-			tType4.append(type4_tEnd - type4_tStart)
-
-			if verbose:
-				print("Temps d'executions rélatifs à l'itération n.", ite, "\n\ttGlobal :", tGlobal, "\n\ttInit :", tInit, "\n\ttType1 :", tType1, "\n\ttType2 :", tType2, "\n\ttType3 :", tType3, "\n\ttType4 :", tType4)
-
-		ordonnee_tGlobal.append( (sum(tGlobal)/len(tGlobal)) )
-		ordonnee_tType1.append( (sum(tType1)/len(tType1)) )
-		ordonnee_tType2.append( (sum(tType2)/len(tType2)) )
-		ordonnee_tType3.append( (sum(tType3)/len(tType3)) )
-		ordonnee_tType4.append( (sum(tType4)/len(tType4)) )
-
-	if verbose:
-		print("Temps d'executions moyens rélatifs au test n.", nb, "\n\tordonnee_tGlobal :", ordonnee_tGlobal, "\n\tordonnee_tInit :", ordonnee_tInit, "\n\tordonnee_tType1 :", ordonnee_tType1, "\n\tordonnee_tType2 :", ordonnee_tType2, "\n\tordonnee_tType3 :", ordonnee_tType3, "\n\tordonnee_tType4 :", ordonnee_tType4)
-	
-	
-	#Affichage graphique
-	plt.figure(figsize = (10, 10))
-	plt.suptitle("Performances")
-	plt.rc('xtick', labelsize=10)    # fontsize of the tick labels
-	
-	# Construction et affichage du tracé "temps de calcul"
-	plt.subplot(3, 1, 1)
-	plt.title("Analyse du temps de calcul en fonction du nombre de sommets n")
-	plt.xlabel("n") # nombre de sommets du graphe G
-	plt.ylabel("t(n)") # temps de calcul en fonction du nombre de sommets du graphe G
-	plt.plot(abscisse_n, ordonnee_tGlobal, color = 'blue')
-	plt.plot(abscisse_n, ordonnee_tInit, color = 'red')
-	plt.plot(abscisse_n, ordonnee_tType1, color = 'green')
-	plt.plot(abscisse_n, ordonnee_tType2, color = 'yellow')
-	plt.plot(abscisse_n, ordonnee_tType3, color = 'black')
-	plt.plot(abscisse_n, ordonnee_tType4, color = 'pink')
-	
-	plt.subplot(3, 1, 2)
-	plt.title("Analyse du temps de calcul en fonction du nombre d'arcs m")
-	plt.xlabel("m") # nombre d'arcs du graphe G
-	plt.ylabel("t(m)") # temps de calcul en fonction du nombre d'arcs du graphe G
-	plt.plot(abscisse_m, ordonnee_tGlobal, color = 'blue')
-	plt.plot(abscisse_m, ordonnee_tInit, color = 'red')
-	plt.plot(abscisse_m, ordonnee_tType1, color = 'green')
-	plt.plot(abscisse_m, ordonnee_tType2, color = 'yellow')
-	plt.plot(abscisse_m, ordonnee_tType3, color = 'black')
-	plt.plot(abscisse_m, ordonnee_tType4, color = 'pink')
-	
-	plt.subplot(3, 1, 3)
-	plt.title("Analyse du temps de calcul en fonction de l'intervalle de dates choisies interval_dates")
-	plt.xlabel("interval_dates") # nombre de sommets du graphe G
-	plt.ylabel("t(interval_dates)") # temps de calcul en fonction de l'interval de dates choisies du graphe G
-	plt.plot(abscisse_interval_dates, ordonnee_tGlobal, color = 'blue')
-	plt.plot(abscisse_interval_dates, ordonnee_tInit, color = 'red')
-	plt.plot(abscisse_interval_dates, ordonnee_tType1, color = 'green')
-	plt.plot(abscisse_interval_dates, ordonnee_tType2, color = 'yellow')
-	plt.plot(abscisse_interval_dates, ordonnee_tType3, color = 'black')
-	plt.plot(abscisse_interval_dates, ordonnee_tType4, color = 'pink')
-	
-	# Sauvegarde du tracé
-	if (save):
-		plt.savefig("TestResults/" + str(datetime.date.today()) + str(datetime.datetime.now().strftime("_%H_%M_%S")) + ".jpeg", transparent = True)
-	
-	plt.show()
-
-
-
-
-
-
-
+from math import floor, ceil 
 import random
 import scipy.stats as st
-from math import floor, ceil 
+
+import matplotlib.pyplot as plt
+
+verbose = True
+
+
+
 
 def randomMultigraphe(n, m, interval_dates):
 	"""
@@ -250,14 +124,152 @@ def randomMultigraphe(n, m, interval_dates):
 			edges.append((source, dest, date, l))	# format arc : (source : str, dest : str, date : int, lambda l : int)
 			print(i, "apres 7 :")
 
-
 	return Multigraph(n, m, vertices, edges)
+
+
+
+
+# Méthode permettant d'afficher un graphique de comparaison des performances ("temps de calcul" et "qualité des Solutions") de l'algorithme choisi
+def plotPerformances(maxN, maxM, maxInterval_dates, nbTests, nbIterations, x, y, interval, save = False):
+	"""
+	"""
+	
+	ordonnee_tGlobal = []  # liste des temps de calcul moyen, vue globale sur le programme
+	ordonnee_tInit = []  # liste des temps de calcul moyen, vue sur l'initialisation (transformation en graphe + calcul d'arbre couvrant)
+	ordonnee_tType1 = []  # liste des temps de calcul moyen, vue sur l'algorithme de type1
+	ordonnee_tType2 = []  # liste des temps de calcul moyen, vue sur l'algorithme de type2
+	ordonnee_tType3 = []  # liste des temps de calcul moyen, vue sur l'algorithme de type3
+	ordonnee_tType4 = []  # liste des temps de calcul moyen, vue sur l'algorithme de type4
+	 
+	abscisse_n = []
+	abscisse_m = []
+	abscisse_interval_dates = []
+
+
+	for nb in range(nbTests):
+
+		n = int(maxN/nbTests*nb)
+		m = int(maxM/nbTests*nb)
+		interval_dates = [ int(maxInterval_dates[0]/nbTests*nb), int(maxInterval_dates[1]/nbTests*nb) ]
+
+		abscisse_n.append(n)
+		abscisse_m.append(m)
+		abscisse_interval_dates.append(interval_dates)
+
+		# Méthode permettant de générer des graphes aléatoires
+		init_tStart = time.time() # init = initialisation programme = transformation en graphe + calcul d'arbre couvrant
+		mg = randomMultigraphe(n, m, interval_dates)
+		g = mg.transform_to_graph()
+		g.BFS(x, y, interval)
+		init_tEnd = time.time()
+		ordonnee_tInit.append(init_tEnd - init_tStart)
+
+		tGlobal = []
+		tInit = []
+		tType1 = []
+		tType2 = []
+		tType3 = []
+		tType4 = []
+
+
+		for ite in range(nbIterations):
+
+			global_tStart = time.time() # global = temps d'execution du programme entier = initialisation + calcul chemins
+			
+			type1_tStart = time.time()
+			mdp.earliest_arrival()
+			type1_tEnd = time.time()
+
+			type2_tStart = time.time()
+			mdp.latest_departure(x, y, interval)
+			type2_tEnd = time.time()
+
+			type3_tStart = time.time()
+			mdp.fastest(x, y, interval)
+			type3_tEnd = time.time()
+
+			type4_tStart = time.time()
+			mdp.shortest(x, y, interval)
+			type4_tEnd = time.time()
+
+			global_tEnd = time.time()
+
+			tGlobal.append(global_tEnd - global_tStart)
+			tInit.append(init_tEnd - init_tStart)
+			tType1.append(type1_tEnd - type1_tStart)
+			tType2.append(type2_tEnd - type2_tStart)
+			tType3.append(type3_tEnd - type3_tStart)
+			tType4.append(type4_tEnd - type4_tStart)
+
+			if verbose:
+				print("Temps d'executions rélatifs à l'itération n.", ite, "\n\ttGlobal :", tGlobal, "\n\ttInit :", tInit, "\n\ttType1 :", tType1, "\n\ttType2 :", tType2, "\n\ttType3 :", tType3, "\n\ttType4 :", tType4)
+
+		ordonnee_tGlobal.append( (sum(tGlobal)/len(tGlobal)) )
+		ordonnee_tType1.append( (sum(tType1)/len(tType1)) )
+		ordonnee_tType2.append( (sum(tType2)/len(tType2)) )
+		ordonnee_tType3.append( (sum(tType3)/len(tType3)) )
+		ordonnee_tType4.append( (sum(tType4)/len(tType4)) )
+
+	if verbose:
+		print("Temps d'executions moyens rélatifs au test n.", nb, "\n\tordonnee_tGlobal :", ordonnee_tGlobal, "\n\tordonnee_tInit :", ordonnee_tInit, "\n\tordonnee_tType1 :", ordonnee_tType1, "\n\tordonnee_tType2 :", ordonnee_tType2, "\n\tordonnee_tType3 :", ordonnee_tType3, "\n\tordonnee_tType4 :", ordonnee_tType4)
+	
+	
+	#Affichage graphique
+	plt.figure(figsize = (10, 10))
+	plt.suptitle("Performances")
+	plt.rc('xtick', labelsize=10)    # fontsize of the tick labels
+	
+	# Construction et affichage du tracé "temps de calcul"
+	plt.subplot(3, 1, 1)
+	plt.title("Analyse du temps de calcul en fonction du nombre de sommets n")
+	plt.xlabel("n") # nombre de sommets du graphe G
+	plt.ylabel("t(n)") # temps de calcul en fonction du nombre de sommets du graphe G
+	plt.plot(abscisse_n, ordonnee_tGlobal, color = 'blue')
+	plt.plot(abscisse_n, ordonnee_tInit, color = 'red')
+	plt.plot(abscisse_n, ordonnee_tType1, color = 'green')
+	plt.plot(abscisse_n, ordonnee_tType2, color = 'yellow')
+	plt.plot(abscisse_n, ordonnee_tType3, color = 'black')
+	plt.plot(abscisse_n, ordonnee_tType4, color = 'pink')
+	
+	plt.subplot(3, 1, 2)
+	plt.title("Analyse du temps de calcul en fonction du nombre d'arcs m")
+	plt.xlabel("m") # nombre d'arcs du graphe G
+	plt.ylabel("t(m)") # temps de calcul en fonction du nombre d'arcs du graphe G
+	plt.plot(abscisse_m, ordonnee_tGlobal, color = 'blue')
+	plt.plot(abscisse_m, ordonnee_tInit, color = 'red')
+	plt.plot(abscisse_m, ordonnee_tType1, color = 'green')
+	plt.plot(abscisse_m, ordonnee_tType2, color = 'yellow')
+	plt.plot(abscisse_m, ordonnee_tType3, color = 'black')
+	plt.plot(abscisse_m, ordonnee_tType4, color = 'pink')
+	
+	plt.subplot(3, 1, 3)
+	plt.title("Analyse du temps de calcul en fonction de l'intervalle de dates choisies interval_dates")
+	plt.xlabel("interval_dates") # nombre de sommets du graphe G
+	plt.ylabel("t(interval_dates)") # temps de calcul en fonction de l'interval de dates choisies du graphe G
+	plt.plot(abscisse_interval_dates, ordonnee_tGlobal, color = 'blue')
+	plt.plot(abscisse_interval_dates, ordonnee_tInit, color = 'red')
+	plt.plot(abscisse_interval_dates, ordonnee_tType1, color = 'green')
+	plt.plot(abscisse_interval_dates, ordonnee_tType2, color = 'yellow')
+	plt.plot(abscisse_interval_dates, ordonnee_tType3, color = 'black')
+	plt.plot(abscisse_interval_dates, ordonnee_tType4, color = 'pink')
+	
+	# Sauvegarde du tracé
+	if (save):
+		plt.savefig("TestResults/" + str(datetime.date.today()) + str(datetime.datetime.now().strftime("_%H_%M_%S")) + ".jpeg", transparent = True)
+	
+	plt.show()
+
+
+
+
+
 
 
 
 
 def performances():
 
+    print("ici")
     maxN = 10
     maxM = 30
     maxInterval_dates = [0, 10]
