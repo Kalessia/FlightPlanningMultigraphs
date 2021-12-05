@@ -8,6 +8,7 @@ from numpy.lib.type_check import _nan_to_num_dispatcher
 import pandas as pd
 import numpy as np
 import re
+from IPython.display import Image
 
 
 ####################################################################################################################
@@ -62,55 +63,50 @@ class Multigraph:
 
 		return Graph(self.n, self.m, newVertices, newEdges, verbose)
 
-	def afficheMultigraphe(self):
+	def printMultigraphe(self):
 		print("\nMultigraph de " + str(self.n) + " sommets et " + str(self.m) + " arcs :")
 		print("\tListe de sommets : " + str(self.vertices) )
 		print("\tListe d'arcs : " + str(self.edges) + "\n" )
 
 
-	def randomMultigraphe(n, m, probM, interval_dates):
-		"""
-		"""
 
+	# Méthode permettant d'afficher à l'écran un multigraphe orienté et, éventuellement, un titre
+	def showMultigraphe(self, titre = "Multi"):
+		# """ G : un dictionnaire representant un graphe { sommet s : sommets adjacents à s}
+		#     titre : titre du graphe à afficher, 'G' par defaut
+		# """
+		dicto = {}
+		newG = nx.MultiDiGraph()
+		newG.add_nodes_from(self.vertices)
 
+		for source, dest, t, w in self.edges:
+			newG.add_edge(source, dest, weight=t)
+			dicto[(source, dest)] = t
 
-
-
-
-
-
-
-
-
-		lignes = []
-		vertices = []
-		edges = []
+		plt.title(titre)
+		pos = nx.circular_layout(newG)
+		e_labels = nx.get_edge_attributes(newG,'weight')
+		nx.draw_networkx(newG, pos=pos, arrows=True, with_labels=True)
+		nx.draw_networkx_edge_labels(newG, pos = pos, label_pos=0.5, font_size=10)
 		
-		try:
-			with open(nomFichier, 'r') as fichier:
-				lignes = fichier.readlines()
-		except:
-			print("Erreur : fichier non trouvé")
-			return None
-		
-		
-		n = int(lignes[0])
-		m = int(lignes[1])
-		
-		for i in range(2, len(lignes)):
-			r = re.compile("^[(][\w]*[,][\w]*[,][0-9]*[,][0-9]*[)]\n*$")
-			if r.match(lignes[i]) is not None:
-				# format d'un arc : (source, dest, int(time), int(weight))
-				e = lignes[i].split("(")[1].split(")")[0].split(",")
-				edges.append((e[0], e[1], int(e[2]), int(e[3])))
-				print((e[0], e[1], int(e[2]), int(e[3])))
-			else :
-				vertices.append(lignes[i].split("\n")[0])
+		toPdot = nx.drawing.nx_pydot.to_pydot
+		pdot = toPdot(newG)
+		#nx.draw(newG, edges_labels=True)
 
-		if len(vertices) != n or len(edges) != m :
-			return None
-			
-		return Multigraph(n, m, vertices, edges)
+		pdot.write_png("Multigraphe.png")
+		plt.show()
+		
+	
+		# nx.draw_networkx_edge_labels(newG, pos=pos, edge_labels=e_labels)
+		# nx.draw(newG, with_labels=True, node_size=1500, pos=pos)
+
+		
+		
+		
+
+		plt.show()  
+
+
 
 #-------------------------------------------------------------------------------------------------------------------
 
@@ -194,8 +190,7 @@ class Graph:
 		return arbreCouvrante
 
 
-
-	# Méthode permettant d'afficher à l'écran un graphe non orienté et, éventuellement, un titre
+	# Méthode permettant d'afficher à l'écran un graphe orienté et, éventuellement, un titre
 	def showGraphe(self, titre = "G"):
 		# """ G : un dictionnaire representant un graphe { sommet s : sommets adjacents à s}
 		#     titre : titre du graphe à afficher, 'G' par defaut
@@ -204,17 +199,19 @@ class Graph:
 		listeSommetsG = list(self.adjacency_list.keys())
 		newG.add_nodes_from(listeSommetsG)
 
-		listeW = []
 		for source in listeSommetsG:
 			for dest , w in self.adjacency_list[source]:
 				newG.add_edge(source, dest, weight=w)
-				listeW.append(w)
 
 		plt.title(titre)
 		pos = nx.circular_layout(newG)
 		e_labels = nx.get_edge_attributes(newG,'weight')
 		nx.draw_networkx_edge_labels(newG, pos=pos, edge_labels=e_labels)
 		nx.draw(newG, with_labels=True, node_size=1500, pos=pos)
+
+		toPdot = nx.drawing.nx_pydot.to_pydot
+		pdot = toPdot(newG)
+		pdot.write_png("Graphe.png")
 
 		plt.show()   
 
@@ -237,6 +234,11 @@ class Graph:
 
 		plt.title(titre)
 		nx.draw(newG, with_labels=True, node_size=1500, node_color="skyblue")
+
+		toPdot = nx.drawing.nx_pydot.to_pydot
+		pdot = toPdot(newG)
+		pdot.write_png("Multigraphe.png")
+
 		plt.show()   
 
 
@@ -517,7 +519,6 @@ def affichageMatG(matG, ensV):
 	df[df==-1] = "-"
 	print(df, "\n")
 
-#-------------------------------------------------------------------------------------------------------------------
 
 
 ####################################################################################################################
@@ -624,7 +625,7 @@ import datetime
 #------------------------------------------------------------------------------------------------------
 
 # Méthode permettant d'afficher un graphique de comparaison des performances ("temps de calcul" et "qualité des Solutions") de l'algorithme choisi
-def plotPerformances(maxN, maxM, probM, maxInterval_dates, nbTests, nbIterations, x, y, interval, verbose = False, save = False):
+def plotPerformances(maxN, maxM, maxInterval_dates, nbTests, nbIterations, x, y, interval, verbose = False, save = False):
 	"""
 	"""
 	
@@ -756,15 +757,134 @@ def plotPerformances(maxN, maxM, probM, maxInterval_dates, nbTests, nbIterations
 
 
 
+
+
+
+import random
+import scipy.stats as st
+from math import floor, ceil 
+
+def randomMultigraphe(n, m, interval_dates):
+	"""
+	"""
+	if n == 0 or m < n:
+		return None
+
+	vertices = ["s"+str(i) for i in range(n)]
+	
+	arcsADistribuer = m
+	edges = []
+	z = random.randint(1, int(np.log(n)) + 1) # nombre de feuilles (sommets finaux sans successeurs) souhaitées ; fonction logarithme népérien
+	l = random.randint(1, int((n % m)) + 1) # lambda
+	k = z*3 + 1 # nombre de arcs supplementaires que on réserve pour les sommets racine et feuilles
+
+	# Parametrisation de truncnorm( (low - mean) / sd, (upp - mean) / sd, loc=mean, scale=sd )
+	borneInf = interval_dates[0] # low
+	borneSup = interval_dates[1] # upp
+	ecartType = int(interval_dates[1]/5) # sd
+	# la moyenne mean vaut l'index du sommet en cours de traitement
+
+	for i in range(m):
+
+		if arcsADistribuer < 1:
+			break
+
+		# On attribue les premieres n-1 arcs pour rélier tous les sommets, tel que tout sommet est rélié à au moins un autre sommet
+		if (i < n):
+			print("on rentre car i =", i)
+			source = vertices[i]
+			nbSuccesseursSource = random.randint(1, int(((n % m))/2) + 1)
+			if ( (i + nbSuccesseursSource) > n ):
+				print("en effet:", i + nbSuccesseursSource, ">", n, "donc", n - i - 1 )
+				nbSuccesseursSource = n - i - 1
+			for j in range(1, nbSuccesseursSource):
+				dest = vertices[i+j]
+				#date = st.skewnorm.rvs(3, i, 5)
+				#date = int(st.truncnorm.rvs( (borneInf - int(source[1])) / ecartType, (borneSup - int(source[1])) / ecartType, loc=int(source[1]), scale=ecartType ) )
+				date = random.randint(borneInf, borneSup + 1)
+				edges.append((source, dest, date, l))	# format arc : (source : str, dest : str, date : int, lambda l : int)
+				arcsADistribuer -= 1
+				print(i, "apres 1 :", arcsADistribuer)
+				if arcsADistribuer == 0:
+					break
+				
+
+		# On s'assure de réserver les derniers arcs à distribuer pour les sommets racine et feuilles
+		elif (arcsADistribuer < k):
+			print("k =", k)
+			x = arcsADistribuer # <--------------------------- ne surtout pas effacer ce passage XD
+			for j in range(floor(x/2)): # floor : partie entière inférieure
+				print("test arcsADistribuer", arcsADistribuer)
+				print("test repartition", floor(arcsADistribuer/2), ceil(arcsADistribuer/2))
+				source = vertices[0] # racine
+				dest = random.choice(vertices[1:z+2]) # choix parmi les premiers z sommets sauf la racine
+				print("ja", j)
+				#date = st.skewnorm.rvs(3, i, 5)
+				#date = int( st.truncnorm.rvs( (borneInf - int(source[1])) / ecartType, (borneSup - int(source[1])) / ecartType, loc=int(source[1]), scale=ecartType ) )
+				date = random.randint(borneInf, borneSup + 1)
+				edges.append((source, dest, date, l))
+				arcsADistribuer -= 1
+				print(i, "apres 2a :", arcsADistribuer)
+
+			for j in range(ceil(x/2)): # floor : partie entière superièure
+				print("sono dentro b, j vale", j)
+				print("sono dentro b, ceil", ceil(arcsADistribuer/2))
+				source = random.choice(vertices[:-z*3+1]) # choix parmi les z*3 derniers sommets
+				dest = random.choice(vertices[vertices.index(source)+1:])
+				print("jb", j)
+				#date = st.skewnorm.rvs(3, i, 5)
+				#date = int( st.truncnorm.rvs( (borneInf - int(source[1])) / ecartType, (borneSup - int(source[1])) / ecartType, loc=int(source[1]), scale=ecartType ) )
+				date = random.randint(borneInf, borneSup + 1)
+				edges.append((source, dest, date, l))
+				arcsADistribuer -= 1
+				print(i, "apres 2b :", arcsADistribuer)
+
+			break
+
+		# Si les 2 cas précedents sont réspectés, le reste des arcs est distribué aléatoirement
+		else:
+			source = random.choice(vertices[:-z]) # tous les valeurs sauf le derniers z sommets (feuilles)
+			dest = random.choice(vertices[vertices.index(source)+1:]) # tous les valeurs sauf le premier sommet (racine)
+			#date = st.skewnorm.rvs(3, i, 5)
+			#date = int( st.truncnorm.rvs(borneInf - int(source[1])) / ecartType, (borneSup - int(source[1])) / ecartType, loc=int(source[1]), scale=ecartType )
+			date = random.randint(borneInf, borneSup + 1)
+			edges.append((source, dest, date, l))	# format arc : (source : str, dest : str, date : int, lambda l : int)
+			arcsADistribuer -= 1
+			print(i, "apres 3 :", arcsADistribuer)
+
+
+	print("len(vertices :", len(vertices), ", n :", n, ", len(edges) :", len(edges), ", m :", m)
+
+	if len(vertices) != n or len(edges) != m :
+		return None
+
+	# Si i<n, alors il y a probablement des sommets non réliés par des arcs au multigraphe.
+	# On rajoute la quantité minimale d'arcs à partir de ces sommets vers des successeurs pour ne pas faire planter la simulation.
+	if (i < n) :
+		print("on a i <n car i = ", i)
+		nbSuccesseursSource = n-i
+		for j in range(nbSuccesseursSource):
+			source = vertices[i-1]
+			dest = random.choice(vertices[vertices.index(source)+1:]) # tous les valeurs sauf le premier sommet (racine)
+			#date = st.skewnorm.rvs(3, i, 5)
+			#date = int(st.truncnorm.rvs( (borneInf - int(source[1])) / ecartType, (borneSup - int(source[1])) / ecartType, loc=int(source[1]), scale=ecartType ) )
+			date = random.randint(borneInf, borneSup + 1)
+			edges.append((source, dest, date, l))	# format arc : (source : str, dest : str, date : int, lambda l : int)
+			print(i, "apres 7 :")
+
+
+	return Multigraph(n, m, vertices, edges)
+
+
 ####################################################################################################################
 #	TESTS DEBUG
 ####################################################################################################################
 
-mg = acquisitionMultigraphe("multigrapheG1.txt")
+# mg = acquisitionMultigraphe("multigrapheG1.txt")
 
-if mg != None :
-	mg.afficheMultigraphe()
-print("------------------------------------------------------------------")
+# if mg != None :
+# 	mg.printMultigraphe()
+# print("------------------------------------------------------------------")
 
 #transformationMultigrapheMatAdjacence(g, verbose = False)
 #print("------------------------------------------------------------------")
@@ -772,11 +892,11 @@ print("------------------------------------------------------------------")
 #listeAdj = transformationMultigrapheListeAdjacence(g, verbose = False)
 #print("------------------------------------------------------------------")
 
-g = mg.transform_to_graph(True)
+# g = mg.transform_to_graph(True)
 #print(g.adjacency_list)
 #print("------------------------------------------------------------------")
 
-g.BFS("a", "g", [0, 10], True)
+# g.BFS("a", "g", [0, 10], True)
 #print("------------------------------------------------------------------")
 
 #g.showGraphe(titre = "graphe issu du multigraphe")
@@ -785,8 +905,15 @@ g.BFS("a", "g", [0, 10], True)
 #g.showGrapheCouvrant(titre = "G Couvrant xxx")
 #print("------------------------------------------------------------------")
 
-earliest_arrival('a', 'g', g, verbose = True)
-print("------------------------------------------------------------------")
+#earliest_arrival('a', 'g', g, verbose = True)
+#print("------------------------------------------------------------------")
 
-plotPerformances(10, 10, [1, 30], 15, 2, 'a', 'g', [2, 10], verbose = False, save = False)
+#plotPerformances(10, 10, [1, 30], 15, 2, 'a', 'g', [2, 10], verbose = False, save = False)
+#print("------------------------------------------------------------------")
+
+rmg = randomMultigraphe(10, 20, [2,7])
+if rmg != None :
+	rmg.printMultigraphe()
+
+rmg.showMultigraphe()
 print("------------------------------------------------------------------")

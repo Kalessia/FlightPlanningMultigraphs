@@ -67,3 +67,5 @@ En tout cas faire en sorte que la valeur du VERBOSE soit rentré une seule fois 
 - Trouver ou créer un générateur de grands graphes pour tester avec un nb d'arcs et de sommets plus grand ?
 
 #####################################################################################################################
+
+- Verifier si il y a des divisions par 0 à gerer dans plotPerformances
