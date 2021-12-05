@@ -148,10 +148,14 @@ class MinimalDistanceProblem():
 		return path
 
 	def shortest(self):
-		
-		path = []
 
-		return path
+		visited_tree, specific_y = self.g.Dijkstra(self.x, self.y, self.interval)
+
+		label, time = specific_y
+		if label != self.y:
+			return []
+
+		return self.traceback(self.g.vertices[self.x], specific_y, visited_tree)
 
 # -------- MAIN -------- #
 
@@ -186,6 +190,7 @@ def main():
 	type2 = p.latest_departure()
 	print("Chemin de type II (Départ le plus tard) :", type2)
 	# type3 = g.fastest(x, y, interval)
-	# type4 = g.shortest(x, y, interval)
+	type4 = p.shortest()
+	print("Chemin de type IV (Chemin le plus court) :", type4)
 
 main()
