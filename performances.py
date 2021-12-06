@@ -155,16 +155,9 @@ def plotPerformances(maxN, maxM, maxInterval_dates, nbTests, nbIterations, x, y,
 		# Méthode permettant de générer des graphes aléatoires
 		init_tStart = time.time() # init = initialisation programme = transformation en graphe + calcul d'arbre couvrant
 		mg = randomMultigraphe(n, m, interval_dates)
-
 		g = mg.transform_to_graph()
 		g.show()
-
 		p = MinimalDistanceProblem(g, x, y, interval)
-
-		# voir si ajouter test sur arbres couvrants
-
-		
-
 		init_tEnd = time.time()
 		ordonnee_tInit.append(init_tEnd - init_tStart)
 
@@ -221,10 +214,11 @@ def plotPerformances(maxN, maxM, maxInterval_dates, nbTests, nbIterations, x, y,
 	#Affichage graphique
 	plt.figure(figsize = (10, 10))
 	plt.suptitle("Performances", size = 20, color = 'red')
+	plt.tight_layout()
 	#plt.rc('xtick', labelsize=10)    # fontsize of the tick labels
 	
 	# Construction et affichage du tracé "temps de calcul"
-	#plt.subplot(3, 1, 1)
+	plt.subplot(3, 1, 1)
 	plt.title("Analyse du temps de calcul en fonction du nombre de sommets n")
 	plt.xlabel("n") # nombre de sommets du graphe G
 	plt.ylabel("t(n)") # temps de calcul en fonction du nombre de sommets du graphe G
@@ -236,7 +230,7 @@ def plotPerformances(maxN, maxM, maxInterval_dates, nbTests, nbIterations, x, y,
 	plt.plot(abscisse_n, ordonnee_tType4, label = "type VI : plus court chemin")
 	plt.legend(loc='best')
 
-	#plt.subplot(3, 1, 2)
+	plt.subplot(3, 1, 2)
 	plt.title("Analyse du temps de calcul en fonction du nombre d'arcs m")
 	plt.xlabel("m") # nombre d'arcs du graphe G
 	plt.ylabel("t(m)") # temps de calcul en fonction du nombre d'arcs du graphe G
@@ -248,7 +242,7 @@ def plotPerformances(maxN, maxM, maxInterval_dates, nbTests, nbIterations, x, y,
 	plt.plot(abscisse_m, ordonnee_tType4, label = "type VI : plus court chemin")
 	plt.legend(loc='best')
 
-	#plt.subplot(3, 1, 3)
+	plt.subplot(3, 1, 3)
 	plt.title("Analyse du temps de calcul en fonction de l'intervalle de dates choisies interval_dates")
 	plt.xlabel("interval_dates") # nombre de sommets du graphe G
 	plt.ylabel("t(interval_dates)") # temps de calcul en fonction de l'interval de dates choisies du graphe G
@@ -287,5 +281,7 @@ def performances():
 	save = False
 	
 	plotPerformances(maxN, maxM, maxInterval_dates, nbTests, nbIterations, x, y, interval, save)
+
+
 	
 performances()
