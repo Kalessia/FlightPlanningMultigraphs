@@ -293,7 +293,6 @@ def plotPerformances_n(minN, maxN, m_fixe, interval_dates_fixe, nbTests, nbItera
 		init_tStart = time.time() # init = initialisation programme = transformation en graphe + calcul d'arbre couvrant
 		mg = randomMultigraphe(n, m_fixe, interval_dates_fixe)
 		g = mg.transform_to_graph()
-		g.show()
 		p = MinimalDistanceProblem(g, x, y, interval_dates_fixe)
 		init_tEnd = time.time()
 		ordonnee_tInit.append(init_tEnd - init_tStart)
@@ -399,7 +398,6 @@ def plotPerformances_m(n_fixe, minM, maxM, interval_dates_fixe, nbTests, nbItera
 		init_tStart = time.time() # init = initialisation programme = transformation en graphe + calcul d'arbre couvrant
 		mg = randomMultigraphe(n_fixe, m, interval_dates_fixe)
 		g = mg.transform_to_graph()
-		g.show()
 		p = MinimalDistanceProblem(g, x, y, interval_dates_fixe)
 		init_tEnd = time.time()
 		ordonnee_tInit.append(init_tEnd - init_tStart)
@@ -502,7 +500,6 @@ def plotPerformances_d(n_fixe, m_fixe, maxInterval_dates, nbTests, nbIterations,
 		init_tStart = time.time() # init = initialisation programme = transformation en graphe + calcul d'arbre couvrant
 		mg = randomMultigraphe(n_fixe, m_fixe, interval_dates)
 		g = mg.transform_to_graph()
-		g.show()
 		p = MinimalDistanceProblem(g, x, y, interval_dates)
 		init_tEnd = time.time()
 		ordonnee_tInit.append(init_tEnd - init_tStart)
@@ -606,9 +603,9 @@ def performances():
 	m_fixe = 100
 	interval_dates_fixe = [1,10]
 
-	#plotPerformances_n(minN, maxN, m_fixe, interval_dates_fixe, nbTests, nbIterations, save)
+	plotPerformances_n(minN, maxN, m_fixe, interval_dates_fixe, nbTests, nbIterations, save)
 	#plotPerformances_m(n_fixe, minM, maxM, interval_dates_fixe, nbTests, nbIterations, save)
-	plotPerformances_d(n_fixe, m_fixe, maxInterval_dates, nbTests, nbIterations, save)
+	#plotPerformances_d(n_fixe, m_fixe, maxInterval_dates, nbTests, nbIterations, save)
 
 	#rmg = randomMultigraphe(10, 30, [0,10])
 
