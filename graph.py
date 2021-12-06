@@ -1,6 +1,7 @@
 import heapq
 import networkx as nx
 import matplotlib.pyplot as plt
+import copy
 
 
 class Graph:
@@ -63,7 +64,7 @@ class Graph:
 
 		t_alpha, t_omega = interval
 		x_list = self.vertices[x]
-		y_list = self.vertices[y].copy()
+		y_list = copy.deepcopy(self.vertices[y])
 
 		if x_list[-1][1] < t_alpha or x_list[0][1] > t_omega or y_list[-1][1] < t_alpha or y_list[0][1] > t_omega:
 			print("[BFS] Aucun trajet possible entre x et y dans l'intervalle selectionné.")
@@ -122,7 +123,7 @@ class Graph:
 
 		t_alpha, t_omega = interval
 		x_list = self.vertices[x]
-		y_list = self.vertices[y].copy()
+		y_list = copy.deepcopy(self.vertices[y])
 
 		if x_list[-1][1] < t_alpha or x_list[0][1] > t_omega or y_list[-1][1] < t_alpha or y_list[0][1] > t_omega:
 			print("Aucun trajet possible entre x et y dans l'intervalle selectionné.")
