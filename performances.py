@@ -292,7 +292,9 @@ def plotPerformances_n(minN, maxN, m_fixe, interval_dates_fixe, nbTests, nbItera
 		# Méthode permettant de générer des graphes aléatoires
 		init_tStart = time.time() # init = initialisation programme = transformation en graphe + calcul d'arbre couvrant
 		mg = randomMultigraphe(n, m_fixe, interval_dates_fixe)
+		mg.show()
 		g = mg.transform_to_graph()
+		g.show()
 		p = MinimalDistanceProblem(g, x, y, interval_dates_fixe)
 		init_tEnd = time.time()
 		ordonnee_tInit.append(init_tEnd - init_tStart)

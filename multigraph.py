@@ -67,7 +67,7 @@ class Multigraph:
 		return Graph(newN, len(newEdges), newVertices, newEdges)
 
 	# Méthode permettant d'afficher à l'écran un multigraphe orienté et, éventuellement, un titre
-	def showMultigraphe(self, title = "Multigraphe pondere par le temps"):
+	def show(self, title = "Multigraphe pondere par le temps"):
 		""" G : un dictionnaire representant un graphe { sommet s : sommets adjacents à s}
 		    titre : titre du graphe à afficher, 'G' par defaut
 		"""
