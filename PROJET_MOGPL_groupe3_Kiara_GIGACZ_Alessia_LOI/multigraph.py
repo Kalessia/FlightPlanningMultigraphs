@@ -1,3 +1,4 @@
+import datetime
 import operator
 import networkx as nx
 from graph import Graph
@@ -6,7 +7,7 @@ import matplotlib.pyplot as plt
 
 class Multigraph:
 
-	def __init__(self, n, m, vertices, edges):
+	def __init__(self, n, m, vertices, edges, verbose=False):
 		
 		self.n = n # number of vertices
 		self.m = m # number of edges
@@ -22,12 +23,10 @@ class Multigraph:
 		print("\tListe de sommets : " + str(self.vertices) )
 		print("\tListe d'arcs : " + str(self.edges) + "\n" )
 
-	def transform_to_graph(self):
+	def transform_to_graph(self, verbose=False):
 		"""
 		Returns a simple graph.
 		"""
-
-		# TODO: Tester si ça marche avec des arbres non connexes
 
 		newVertices = {} # {original_vertex : list of new vertices}
 		newEdges = []
@@ -91,7 +90,7 @@ class Multigraph:
 
 		toPdot = nx.drawing.nx_pydot.to_pydot
 		pdot = toPdot(newG)
-		pdot.write_png("Multigraph.png")
+		pdot.write_png("Visualisation_multigraphes/Multigraph/" + str(datetime.date.today()) + str(datetime.datetime.now().strftime("_%H_%M_%S")) + ".jpeg", transparent = True)
 
 		plt.show()
 		

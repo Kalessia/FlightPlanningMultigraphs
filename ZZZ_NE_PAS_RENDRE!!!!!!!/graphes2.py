@@ -233,7 +233,7 @@ class Graph:
 
 		toPdot = nx.drawing.nx_pydot.to_pydot
 		pdot = toPdot(newG)
-		pdot.write_png("Multigraphe.png")
+		pdot.write_png("GrapheCouvrant.png")
 
 		plt.show()   
 

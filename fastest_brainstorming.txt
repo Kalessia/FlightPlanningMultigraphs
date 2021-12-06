@@ -1,0 +1,5 @@
+idées pour fastest():
+
+- plusieurs BFS avec les permutations de (specific_x, specific_y)
+- Dijkstra avec la durée au lieu de lambda = 0 -> doesn't work, issue when paths of the same length
+- BFS avec graphe transformé qui contient des noeuds intermédiares (a,1) -> (a,2) et jamais (a,1) -> (a,3)
