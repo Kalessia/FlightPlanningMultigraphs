@@ -1,6 +1,6 @@
 from multigraph import Multigraph
 from graph import Graph
-from minimalDistanceProblem import MinimalDistanceProblem as mdp
+from minimalDistanceProblem import MinimalDistanceProblem
 
 import time
 import datetime
@@ -12,7 +12,7 @@ import numpy as np
 
 import matplotlib.pyplot as plt
 
-verbose = True
+verbose = False
 
 
 
@@ -143,7 +143,7 @@ def plotPerformances(maxN, maxM, maxInterval_dates, nbTests, nbIterations, x, y,
 	abscisse_interval_dates = []
 	
 
-	for nb in range(nbTests):
+	for nb in range(1, nbTests+1):
 		n = int(maxN/nbTests*nb)
 		m = int(maxM/nbTests*nb)
 		interval_dates = [ int(maxInterval_dates[0]/nbTests*nb), int(maxInterval_dates[1]/nbTests*nb) ]
@@ -155,10 +155,16 @@ def plotPerformances(maxN, maxM, maxInterval_dates, nbTests, nbIterations, x, y,
 		# Méthode permettant de générer des graphes aléatoires
 		init_tStart = time.time() # init = initialisation programme = transformation en graphe + calcul d'arbre couvrant
 		mg = randomMultigraphe(n, m, interval_dates)
-		mg.printMultigraphe()
 
 		g = mg.transform_to_graph()
-		g.BFS(x, y, interval)
+		g.show()
+
+		p = MinimalDistanceProblem(g, x, y, interval)
+
+		# voir si ajouter test sur arbres couvrants
+
+		
+
 		init_tEnd = time.time()
 		ordonnee_tInit.append(init_tEnd - init_tStart)
 
@@ -175,19 +181,19 @@ def plotPerformances(maxN, maxM, maxInterval_dates, nbTests, nbIterations, x, y,
 			global_tStart = time.time() # global = temps d'execution du programme entier = initialisation + calcul chemins
 			
 			type1_tStart = time.time()
-			mdp.earliest_arrival()
+			p.earliest_arrival()
 			type1_tEnd = time.time()
 
 			type2_tStart = time.time()
-			mdp.latest_departure(x, y, interval)
+			p.latest_departure()
 			type2_tEnd = time.time()
 
 			type3_tStart = time.time()
-			mdp.fastest(x, y, interval)
+			p.fastest()
 			type3_tEnd = time.time()
 
 			type4_tStart = time.time()
-			mdp.shortest(x, y, interval)
+			p.shortest()
 			type4_tEnd = time.time()
 
 			global_tEnd = time.time()
@@ -214,42 +220,45 @@ def plotPerformances(maxN, maxM, maxInterval_dates, nbTests, nbIterations, x, y,
 	
 	#Affichage graphique
 	plt.figure(figsize = (10, 10))
-	plt.suptitle("Performances")
-	plt.rc('xtick', labelsize=10)    # fontsize of the tick labels
+	plt.suptitle("Performances", size = 20, color = 'red')
+	#plt.rc('xtick', labelsize=10)    # fontsize of the tick labels
 	
 	# Construction et affichage du tracé "temps de calcul"
-	plt.subplot(3, 1, 1)
+	#plt.subplot(3, 1, 1)
 	plt.title("Analyse du temps de calcul en fonction du nombre de sommets n")
 	plt.xlabel("n") # nombre de sommets du graphe G
 	plt.ylabel("t(n)") # temps de calcul en fonction du nombre de sommets du graphe G
-	plt.plot(abscisse_n, ordonnee_tGlobal, color = 'blue')
-	plt.plot(abscisse_n, ordonnee_tInit, color = 'red')
-	plt.plot(abscisse_n, ordonnee_tType1, color = 'green')
-	plt.plot(abscisse_n, ordonnee_tType2, color = 'yellow')
-	plt.plot(abscisse_n, ordonnee_tType3, color = 'black')
-	plt.plot(abscisse_n, ordonnee_tType4, color = 'pink')
-	
-	plt.subplot(3, 1, 2)
+	plt.plot(abscisse_n, ordonnee_tGlobal, label = "temps Global")
+	plt.plot(abscisse_n, ordonnee_tInit, label = "temps initialisation")
+	plt.plot(abscisse_n, ordonnee_tType1, label = "type I : chemin d'arrivée au plus tôt")
+	plt.plot(abscisse_n, ordonnee_tType2, label = "type II : chemin de départ au plus tard")
+	plt.plot(abscisse_n, ordonnee_tType3, label = "type III : chemin le plus rapide")
+	plt.plot(abscisse_n, ordonnee_tType4, label = "type VI : plus court chemin")
+	plt.legend(loc='best')
+
+	#plt.subplot(3, 1, 2)
 	plt.title("Analyse du temps de calcul en fonction du nombre d'arcs m")
 	plt.xlabel("m") # nombre d'arcs du graphe G
 	plt.ylabel("t(m)") # temps de calcul en fonction du nombre d'arcs du graphe G
-	plt.plot(abscisse_m, ordonnee_tGlobal, color = 'blue')
-	plt.plot(abscisse_m, ordonnee_tInit, color = 'red')
-	plt.plot(abscisse_m, ordonnee_tType1, color = 'green')
-	plt.plot(abscisse_m, ordonnee_tType2, color = 'yellow')
-	plt.plot(abscisse_m, ordonnee_tType3, color = 'black')
-	plt.plot(abscisse_m, ordonnee_tType4, color = 'pink')
-	
-	plt.subplot(3, 1, 3)
+	plt.plot(abscisse_m, ordonnee_tGlobal, label = "temps Global")
+	plt.plot(abscisse_m, ordonnee_tInit, label = "temps initialisation")
+	plt.plot(abscisse_m, ordonnee_tType1, label = "type I : chemin d'arrivée au plus tôt")
+	plt.plot(abscisse_m, ordonnee_tType2, label = "type II : chemin de départ au plus tard")
+	plt.plot(abscisse_m, ordonnee_tType3, label = "type III : chemin le plus rapide")
+	plt.plot(abscisse_m, ordonnee_tType4, label = "type VI : plus court chemin")
+	plt.legend(loc='best')
+
+	#plt.subplot(3, 1, 3)
 	plt.title("Analyse du temps de calcul en fonction de l'intervalle de dates choisies interval_dates")
 	plt.xlabel("interval_dates") # nombre de sommets du graphe G
 	plt.ylabel("t(interval_dates)") # temps de calcul en fonction de l'interval de dates choisies du graphe G
-	plt.plot(abscisse_interval_dates, ordonnee_tGlobal, color = 'blue')
-	plt.plot(abscisse_interval_dates, ordonnee_tInit, color = 'red')
-	plt.plot(abscisse_interval_dates, ordonnee_tType1, color = 'green')
-	plt.plot(abscisse_interval_dates, ordonnee_tType2, color = 'yellow')
-	plt.plot(abscisse_interval_dates, ordonnee_tType3, color = 'black')
-	plt.plot(abscisse_interval_dates, ordonnee_tType4, color = 'pink')
+	plt.plot(abscisse_interval_dates, ordonnee_tGlobal, label = "temps Global")
+	plt.plot(abscisse_interval_dates, ordonnee_tInit, label = "temps initialisation")
+	plt.plot(abscisse_interval_dates, ordonnee_tType1, label = "type I : chemin d'arrivée au plus tôt")
+	plt.plot(abscisse_interval_dates, ordonnee_tType2, label = "type II : chemin de départ au plus tard")
+	plt.plot(abscisse_interval_dates, ordonnee_tType3, label = "type III : chemin le plus rapide")
+	plt.plot(abscisse_interval_dates, ordonnee_tType4, label = "type VI : plus court chemin")
+
 	
 	# Sauvegarde du tracé
 	if (save):
@@ -266,19 +275,17 @@ def plotPerformances(maxN, maxM, maxInterval_dates, nbTests, nbIterations, x, y,
 
 
 def performances():
-
-    maxN = 10
-    maxM = 30
-    maxInterval_dates = [0, 10]
-    nbTests = 10
-    nbIterations = 3
-    x = "a"
-    y = "g"
-    interval = [0, 10]
-    save = False
-    
-    #plotPerformances(maxN, maxM, maxInterval_dates, nbTests, nbIterations, x, y, interval, save)
-    mg = randomMultigraphe(10, 30, maxInterval_dates)
-	print(mg)
-
+	
+	maxN = 10
+	maxM = 30
+	maxInterval_dates = [0, 30]
+	nbTests = 1
+	nbIterations = 1
+	x = "s0"
+	y = "s" + str(maxN-1)
+	interval = maxInterval_dates
+	save = False
+	
+	plotPerformances(maxN, maxM, maxInterval_dates, nbTests, nbIterations, x, y, interval, save)
+	
 performances()
