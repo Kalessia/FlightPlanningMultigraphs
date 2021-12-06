@@ -123,6 +123,8 @@ class MinimalDistanceProblem():
 
 	def fastest(self, verbose=False):
 
+		# TODO: A DEBUGGER !!
+
 		if self.x == self.y:
 			return [x]
 		
@@ -148,7 +150,7 @@ class MinimalDistanceProblem():
 
 		if verbose:
 			print("Il n'existe aucun chemin de x à y.")	
-		return []
+			return []
 
 		return path
 
@@ -159,7 +161,6 @@ class MinimalDistanceProblem():
 		"""
 
 		visited_tree, specific_y = self.g.Dijkstra(self.x, self.y, self.interval)
-
 
 		label, time = specific_y
 		if label != self.y:
@@ -179,7 +180,7 @@ class MinimalDistanceProblem():
 		coefficients = []
 		variables = [str(e) for e in edges]
 		constraint_names = [str(v) for v in vertices]
-		print("Variables: ", variables, "\n Constraint names: ", constraint_names)
+
 		constraints = np.zeros((nbcont, nbvar), dtype=int)
 		constraints = pd.DataFrame(constraints, constraint_names, variables)
 
@@ -214,7 +215,7 @@ class MinimalDistanceProblem():
 				constraints[str((vertice, succ, weight))][str(vertice)] = 1
 
 		constraints = constraints.values.tolist()
-		print("Constraints:", constraints)
+		# print("Constraints:", constraints)
 
 		lines = range(nbcont)
 		columns = range(nbvar)

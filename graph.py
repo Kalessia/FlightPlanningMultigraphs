@@ -106,7 +106,7 @@ class Graph:
 						visited_tree[successor] = current_v
 
 						label, time = successor
-						if label == y:
+						if label == y and successor in y_list:
 							y_list.remove(successor) # to allow early exit
 
 		print("\n[BFS] visited_tree :", visited_tree, "\n")
