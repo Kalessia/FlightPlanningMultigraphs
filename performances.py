@@ -42,23 +42,43 @@ def randomMultigraphe(n, m, interval_dates):
 			break
 
 		# On attribue les premieres n-1 arcs pour rélier tous les sommets, tel que tout sommet est rélié à au moins un autre sommet
-		if (i < n):
+		if (i < n - 1):
+
+			
 			print("on rentre car i =", i)
 			source = vertices[i]
-			nbSuccesseursSource = random.randint(1, int(((n % m))/2) + 1)
-			if ( (i + nbSuccesseursSource) > n ):
-				print("en effet:", i + nbSuccesseursSource, ">", n, "donc", n - i - 1 )
-				nbSuccesseursSource = n - i - 1
-			for j in range(1, nbSuccesseursSource):
+			
+			print("il manque a distribuer :", arcsADistribuer)
+
+			nbSuccesseursSource = random.randint(1, int(((arcsADistribuer % n))/2) + 1)					
+			if (nbSuccesseursSource > len(vertices) - i - 2):
+				nbSuccesseursSource = 1
+			print("nbSuccesseursSource", nbSuccesseursSource)
+			# if ( (i + nbSuccesseursSource) > n ):
+			# 	print("en effet:", i + nbSuccesseursSource, ">", n, "donc", n - i - 1 )
+			# 	nbSuccesseursSource = n - i - 1
+			for j in range(1, nbSuccesseursSource+1):
 				dest = vertices[i+j]
-				#date = st.skewnorm.rvs(3, i, 5)
-				#date = int(st.truncnorm.rvs( (borneInf - int(source[1])) / ecartType, (borneSup - int(source[1])) / ecartType, loc=int(source[1]), scale=ecartType ) )
-				date = random.randint(borneInf, borneSup + 1)
-				edges.append((source, dest, date, l))	# format arc : (source : str, dest : str, date : int, lambda l : int)
+				date = st.truncnorm.rvs( (borneInf - int(source[1])) / ecartType, (borneSup - int(source[1])) / ecartType, loc=int(source[1]), scale=ecartType )
+				edges.append((source, dest, int(date), l))	# format arc : (source : str, dest : str, date : int, lambda l : int)
 				arcsADistribuer -= 1
 				print(i, "apres 1 :", arcsADistribuer)
 				if arcsADistribuer == 0:
 					break
+
+
+				# 				# Si i<n, alors il y a probablement des sommets non réliés par des arcs au multigraphe.
+				# # On rajoute la quantité minimale d'arcs à partir de ces sommets vers des successeurs pour ne pas faire planter la simulation.
+				# if (i < n) :
+				# 	print("on a i <n car i = ", i)
+				# 	nbSuccesseursSource = n-i
+				# 	for j in range(nbSuccesseursSource):
+				# 		source = vertices[i-1]
+				# 		dest = random.choice(vertices[vertices.index(source)+1:]) # tous les valeurs sauf le premier sommet (racine)
+				# 		date = st.truncnorm.rvs( (borneInf - int(source[1])) / ecartType, (borneSup - int(source[1])) / ecartType, loc=int(source[1]), scale=ecartType )
+				# 		edges.append((source, dest, int(date), l))	# format arc : (source : str, dest : str, date : int, lambda l : int)
+				# 		print(i, "apres 7 :")
+
 				
 
 		# On s'assure de réserver les derniers arcs à distribuer pour les sommets racine et feuilles
@@ -71,10 +91,8 @@ def randomMultigraphe(n, m, interval_dates):
 				source = vertices[0] # racine
 				dest = random.choice(vertices[1:z+2]) # choix parmi les premiers z sommets sauf la racine
 				print("ja", j)
-				#date = st.skewnorm.rvs(3, i, 5)
-				#date = int( st.truncnorm.rvs( (borneInf - int(source[1])) / ecartType, (borneSup - int(source[1])) / ecartType, loc=int(source[1]), scale=ecartType ) )
-				date = random.randint(borneInf, borneSup + 1)
-				edges.append((source, dest, date, l))
+				date = st.truncnorm.rvs( (borneInf - int(source[1])) / ecartType, (borneSup - int(source[1])) / ecartType, loc=int(source[1]), scale=ecartType )
+				edges.append((source, dest, int(date), l))
 				arcsADistribuer -= 1
 				print(i, "apres 2a :", arcsADistribuer)
 
@@ -84,10 +102,8 @@ def randomMultigraphe(n, m, interval_dates):
 				source = random.choice(vertices[:-z*3+1]) # choix parmi les z*3 derniers sommets
 				dest = random.choice(vertices[vertices.index(source)+1:])
 				print("jb", j)
-				#date = st.skewnorm.rvs(3, i, 5)
-				#date = int( st.truncnorm.rvs( (borneInf - int(source[1])) / ecartType, (borneSup - int(source[1])) / ecartType, loc=int(source[1]), scale=ecartType ) )
-				date = random.randint(borneInf, borneSup + 1)
-				edges.append((source, dest, date, l))
+				date = st.truncnorm.rvs( (borneInf - int(source[1])) / ecartType, (borneSup - int(source[1])) / ecartType, loc=int(source[1]), scale=ecartType )
+				edges.append((source, dest, int(date), l))
 				arcsADistribuer -= 1
 				print(i, "apres 2b :", arcsADistribuer)
 
@@ -97,10 +113,8 @@ def randomMultigraphe(n, m, interval_dates):
 		else:
 			source = random.choice(vertices[:-z]) # tous les valeurs sauf le derniers z sommets (feuilles)
 			dest = random.choice(vertices[vertices.index(source)+1:]) # tous les valeurs sauf le premier sommet (racine)
-			#date = st.skewnorm.rvs(3, i, 5)
-			#date = int( st.truncnorm.rvs(borneInf - int(source[1])) / ecartType, (borneSup - int(source[1])) / ecartType, loc=int(source[1]), scale=ecartType )
-			date = random.randint(borneInf, borneSup + 1)
-			edges.append((source, dest, date, l))	# format arc : (source : str, dest : str, date : int, lambda l : int)
+			date = st.truncnorm.rvs( (borneInf - int(source[1])) / ecartType, (borneSup - int(source[1])) / ecartType, loc=int(source[1]), scale=ecartType )
+			edges.append((source, dest, int(date), l))	# format arc : (source : str, dest : str, date : int, lambda l : int)
 			arcsADistribuer -= 1
 			print(i, "apres 3 :", arcsADistribuer)
 
@@ -109,20 +123,6 @@ def randomMultigraphe(n, m, interval_dates):
 
 	if len(vertices) != n or len(edges) != m :
 		return None
-
-	# Si i<n, alors il y a probablement des sommets non réliés par des arcs au multigraphe.
-	# On rajoute la quantité minimale d'arcs à partir de ces sommets vers des successeurs pour ne pas faire planter la simulation.
-	if (i < n) :
-		print("on a i <n car i = ", i)
-		nbSuccesseursSource = n-i
-		for j in range(nbSuccesseursSource):
-			source = vertices[i-1]
-			dest = random.choice(vertices[vertices.index(source)+1:]) # tous les valeurs sauf le premier sommet (racine)
-			#date = st.skewnorm.rvs(3, i, 5)
-			#date = int(st.truncnorm.rvs( (borneInf - int(source[1])) / ecartType, (borneSup - int(source[1])) / ecartType, loc=int(source[1]), scale=ecartType ) )
-			date = random.randint(borneInf, borneSup + 1)
-			edges.append((source, dest, date, l))	# format arc : (source : str, dest : str, date : int, lambda l : int)
-			print(i, "apres 7 :")
 
 	return Multigraph(n, m, vertices, edges)
 
@@ -161,7 +161,6 @@ def plotPerformances(maxN, maxM, maxInterval_dates, nbTests, nbIterations, save 
 		init_tStart = time.time() # init = initialisation programme = transformation en graphe + calcul d'arbre couvrant
 		mg = randomMultigraphe(n, m, interval_dates)
 		g = mg.transform_to_graph()
-		g.show()
 		p = MinimalDistanceProblem(g, x, y, interval_dates)
 		init_tEnd = time.time()
 		ordonnee_tInit.append(init_tEnd - init_tStart)
@@ -264,7 +263,6 @@ def plotPerformances(maxN, maxM, maxInterval_dates, nbTests, nbIterations, save 
 		plt.savefig("TestResults/" + str(datetime.date.today()) + str(datetime.datetime.now().strftime("_%H_%M_%S")) + ".jpeg", transparent = True)
 	
 	plt.subplots_adjust(left=None, bottom=None, right=None, top=None, wspace=0.2, hspace=0.2)
-	plt.legend(handles = ['red', 'magenta', 'cyan', 'black'], labels=["A","B","C","D"], loc="upper center", borderaxespad=0.1)
 	
 	plt.show()
 
@@ -373,7 +371,6 @@ def plotPerformances_n(minN, maxN, m_fixe, interval_dates_fixe, nbTests, nbItera
 	if (save):
 		plt.savefig("TestResults_n/" + str(datetime.date.today()) + str(datetime.datetime.now().strftime("_%H_%M_%S")) + ".jpeg", transparent = True)
 	
-	#plt.subplots_adjust(left=None, bottom=None, right=None, top=None, wspace=0.2, hspace=0.2)	
 	plt.show()
 
 
@@ -477,7 +474,6 @@ def plotPerformances_m(n_fixe, minM, maxM, interval_dates_fixe, nbTests, nbItera
 	if (save):
 		plt.savefig("TestResults_m/" + str(datetime.date.today()) + str(datetime.datetime.now().strftime("_%H_%M_%S")) + ".jpeg", transparent = True)
 	
-	#plt.subplots_adjust(left=None, bottom=None, right=None, top=None, wspace=0.2, hspace=0.2)	
 	plt.show()
 
 
@@ -580,7 +576,6 @@ def plotPerformances_d(n_fixe, m_fixe, maxInterval_dates, nbTests, nbIterations,
 	if (save):
 		plt.savefig("TestResults_interval_dates/" + str(datetime.date.today()) + str(datetime.datetime.now().strftime("_%H_%M_%S")) + ".jpeg", transparent = True)
 	
-	#plt.subplots_adjust(left=None, bottom=None, right=None, top=None, wspace=0.2, hspace=0.2)	
 	plt.show()
 
 
@@ -610,10 +605,19 @@ def performances():
 	m_fixe = 100
 	interval_dates_fixe = [1,10]
 
-	plotPerformances_n(minN, maxN, m_fixe, interval_dates_fixe, nbTests, nbIterations, save)
-	plotPerformances_m(n_fixe, minM, maxM, interval_dates_fixe, nbTests, nbIterations, save)
-	plotPerformances_d(n_fixe, m_fixe, maxInterval_dates, nbTests, nbIterations, save)
+	#plotPerformances_n(minN, maxN, m_fixe, interval_dates_fixe, nbTests, nbIterations, save)
+	#plotPerformances_m(n_fixe, minM, maxM, interval_dates_fixe, nbTests, nbIterations, save)
+	#plotPerformances_d(n_fixe, m_fixe, maxInterval_dates, nbTests, nbIterations, save)
 
+	rmg = randomMultigraphe(10, 30, [0,10])
+
+	if rmg != None :
+		rmg.show()
 	
+
+	print(rmg)
+
+
+
 
 performances()

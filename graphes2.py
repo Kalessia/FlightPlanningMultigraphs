@@ -71,40 +71,29 @@ class Multigraph:
 
 
 	# Méthode permettant d'afficher à l'écran un multigraphe orienté et, éventuellement, un titre
-	def showMultigraphe(self, titre = "Multi"):
-		# """ G : un dictionnaire representant un graphe { sommet s : sommets adjacents à s}
-		#     titre : titre du graphe à afficher, 'G' par defaut
-		# """
-		dicto = {}
-		newG = nx.MultiDiGraph()
+	def showMultigraphe(self, title = "Multi"):
+		""" G : un dictionnaire representant un graphe { sommet s : sommets adjacents à s}
+		    titre : titre du graphe à afficher, 'G' par defaut
+		"""
+
+		newG = nx.MultiGraph()
 		newG.add_nodes_from(self.vertices)
 
 		for source, dest, t, w in self.edges:
 			newG.add_edge(source, dest, weight=t)
-			dicto[(source, dest)] = t
 
-		plt.title(titre)
+		plt.title(title)
 		pos = nx.circular_layout(newG)
-		e_labels = nx.get_edge_attributes(newG,'weight')
-		nx.draw_networkx(newG, pos=pos, arrows=True, with_labels=True)
-		nx.draw_networkx_edge_labels(newG, pos = pos, label_pos=0.5, font_size=10)
-		
+		e_labels = nx.get_edge_attributes(newG, 'weight')
+		nx.draw_networkx_edge_labels(newG, pos=pos, edge_labels=e_labels)
+		nx.draw(newG, with_labels=True, node_size=1500, pos=pos)
+
 		toPdot = nx.drawing.nx_pydot.to_pydot
 		pdot = toPdot(newG)
-		#nx.draw(newG, edges_labels=True)
+		pdot.write_png("Multigraph.png")
 
-		pdot.write_png("Multigraphe.png")
 		plt.show()
-		
-	
-		# nx.draw_networkx_edge_labels(newG, pos=pos, edge_labels=e_labels)
-		# nx.draw(newG, with_labels=True, node_size=1500, pos=pos)
 
-		
-		
-		
-
-		plt.show()  
 
 
 
