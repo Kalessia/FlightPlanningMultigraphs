@@ -9,6 +9,7 @@ import pandas as pd
 import numpy as np
 import re
 from IPython.display import Image
+import graphviz
 
 
 ####################################################################################################################
@@ -76,7 +77,7 @@ class Multigraph:
 		    titre : titre du graphe à afficher, 'G' par defaut
 		"""
 
-		newG = nx.MultiGraph()
+		newG = nx.MultiDiGraph()
 		newG.add_nodes_from(self.vertices)
 
 		for source, dest, t, w in self.edges:
@@ -84,8 +85,13 @@ class Multigraph:
 
 		plt.title(title)
 		pos = nx.circular_layout(newG)
+
+		dict_labels = {}
 		e_labels = nx.get_edge_attributes(newG, 'weight')
-		nx.draw_networkx_edge_labels(newG, pos=pos, edge_labels=e_labels)
+		for u, v, w in e_labels:
+			dict_labels[(u,v)] = w
+
+		nx.draw_networkx_edge_labels(newG, pos=pos, edge_labels=dict_labels)
 		nx.draw(newG, with_labels=True, node_size=1500, pos=pos)
 
 		toPdot = nx.drawing.nx_pydot.to_pydot
@@ -93,6 +99,7 @@ class Multigraph:
 		pdot.write_png("Multigraph.png")
 
 		plt.show()
+
 
 
 
