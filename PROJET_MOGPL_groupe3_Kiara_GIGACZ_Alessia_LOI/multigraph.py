@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 
 class Multigraph:
 
-	def __init__(self, n, m, vertices, edges):
+	def __init__(self, n, m, vertices, edges, verbose=False):
 		
 		self.n = n # number of vertices
 		self.m = m # number of edges
@@ -23,7 +23,7 @@ class Multigraph:
 		print("\tListe de sommets : " + str(self.vertices) )
 		print("\tListe d'arcs : " + str(self.edges) + "\n" )
 
-	def transform_to_graph(self):
+	def transform_to_graph(self, verbose=False):
 		"""
 		Returns a simple graph.
 		"""

@@ -6,7 +6,7 @@ import copy
 
 class Graph:
 
-	def __init__(self, n, m, vertices, edges):
+	def __init__(self, n, m, vertices, edges, verbose=False):
 		
 		self.n = n # number of vertices
 		self.m = m # number of edges

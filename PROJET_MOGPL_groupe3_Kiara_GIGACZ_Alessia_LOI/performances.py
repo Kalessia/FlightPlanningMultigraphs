@@ -15,7 +15,7 @@ verbose = False
 
 
 
-def randomMultigraphe(n, m, interval_dates):
+def randomMultigraphe(n, m, interval_dates, verbose=False):
 	"""
 	"""
 	if n == 0 or m < n:
@@ -90,7 +90,7 @@ def randomMultigraphe(n, m, interval_dates):
 
 
 # Méthode permettant d'afficher un graphique de comparaison des performances ("temps de calcul" et "qualité des Solutions") de l'algorithme choisi
-def plotPerformances_n(minN, maxN, m_fixe, interval_dates_fixe, nbTests, nbIterations, save = False):
+def plotPerformances_n(minN, maxN, m_fixe, interval_dates_fixe, nbTests, nbIterations, verbose=False, save = False):
 	ordonnee_tGlobal = []  # liste des temps de calcul moyen, vue globale sur le programme
 	ordonnee_tInit = []  # liste des temps de calcul moyen, vue sur l'initialisation (transformation en graphe + calcul d'arbre couvrant)
 	ordonnee_tType1 = []  # liste des temps de calcul moyen, vue sur l'algorithme de type1
@@ -205,7 +205,7 @@ def plotPerformances_n(minN, maxN, m_fixe, interval_dates_fixe, nbTests, nbItera
 
 
 # Méthode permettant d'afficher un graphique de comparaison des performances ("temps de calcul" et "qualité des Solutions") de l'algorithme choisi
-def plotPerformances_m(n_fixe, minM, maxM, interval_dates_fixe, nbTests, nbIterations, save = False):
+def plotPerformances_m(n_fixe, minM, maxM, interval_dates_fixe, nbTests, nbIterations, verbose=False, save = False):
 	ordonnee_tGlobal = []  # liste des temps de calcul moyen, vue globale sur le programme
 	ordonnee_tInit = []  # liste des temps de calcul moyen, vue sur l'initialisation (transformation en graphe + calcul d'arbre couvrant)
 	ordonnee_tType1 = []  # liste des temps de calcul moyen, vue sur l'algorithme de type1
@@ -319,7 +319,7 @@ def plotPerformances_m(n_fixe, minM, maxM, interval_dates_fixe, nbTests, nbItera
 
 
 # Méthode permettant d'afficher un graphique de comparaison des performances ("temps de calcul" et "qualité des Solutions") de l'algorithme choisi
-def plotPerformances_d(n_fixe, m_fixe, maxInterval_dates, nbTests, nbIterations, save = False):
+def plotPerformances_d(n_fixe, m_fixe, maxInterval_dates, nbTests, nbIterations, verbose=False, save = False):
 	ordonnee_tGlobal = []  # liste des temps de calcul moyen, vue globale sur le programme
 	ordonnee_tInit = []  # liste des temps de calcul moyen, vue sur l'initialisation (transformation en graphe + calcul d'arbre couvrant)
 	ordonnee_tType1 = []  # liste des temps de calcul moyen, vue sur l'algorithme de type1
@@ -436,6 +436,7 @@ def performances():
 	
 	nbTests = 2
 	nbIterations = 1
+	verbose=False
 	save = False
 
 	# Paramètres choisis pour les tests, gérés dans plotPerformances pour la création des random multigraphes:
@@ -459,9 +460,9 @@ def performances():
 	interval_dates_fixe = [1,10]
 
 
-	plotPerformances_n(minN, maxN, m_fixe, interval_dates_fixe, nbTests, nbIterations, save)
-	plotPerformances_m(n_fixe, minM, maxM, interval_dates_fixe, nbTests, nbIterations, save)
-	plotPerformances_d(n_fixe, m_fixe, maxInterval_dates, nbTests, nbIterations, save)
+	plotPerformances_n(minN, maxN, m_fixe, interval_dates_fixe, nbTests, nbIterations, verbose, save)
+	plotPerformances_m(n_fixe, minM, maxM, interval_dates_fixe, nbTests, nbIterations, verbose, save)
+	plotPerformances_d(n_fixe, m_fixe, maxInterval_dates, nbTests, nbIterations, verbose, save)
 
 
 

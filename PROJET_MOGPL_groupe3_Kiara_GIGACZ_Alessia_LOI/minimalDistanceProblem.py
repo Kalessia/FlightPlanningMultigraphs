@@ -153,7 +153,7 @@ class MinimalDistanceProblem():
 
 		return path
 
-	def shortest(self):
+	def shortest(self, verbose=False):
 		"""
 		Returns a path from x to y for which the sum of the arc weights is minimal.
 
