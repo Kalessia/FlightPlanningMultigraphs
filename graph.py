@@ -2,7 +2,6 @@ import heapq
 import networkx as nx
 import matplotlib.pyplot as plt
 
-
 class Graph:
 
 	def __init__(self, n, m, vertices, edges):
@@ -59,7 +58,7 @@ class Graph:
 		else:
 			adjacency_list = self.adjacency_list
 
-		visited_tree = {} # key: successor of the parent (child), value : parent
+		visited_tree = {} # key: successor of the parent (child), value: parent
 
 		t_alpha, t_omega = interval
 		x_list = self.vertices[x]
@@ -84,30 +83,29 @@ class Graph:
 		if verbose:
 			print("[BFS] Racine:", root)
 
-		# To allow early exit [Optional (worth it if total nb of vertices >> len(path to y))]
-		for vertex, time in y_list:
-			if time < t_alpha or time > t_omega:
-				y_list.remove((vertex, time)) # Keeps (y, t) only if t is within interval
-		
-		queue = [root]
-		visited_tree[root] = None
+		queue = x_list.copy()
+		for x in queue:
+			visited_tree[x] = None
 
 		while (len(queue) > 0 and len(y_list) > 0): # complexity of len() in python : O(1), in other languages use counter to optimise
+			
 			current_v = queue.pop(0)
+			
 			if verbose:
 				print("\n[BFS] Etat de la file :", queue)
 				print("[BFS] Sommet à traiter :", current_v)
+			
 			if current_v in self.adjacency_list.keys():
 				for successor, weight in adjacency_list[current_v]:
+
 					if verbose:
 						print("\tSuccesseur :", successor)
-					if successor not in visited_tree:
-						queue.append(successor)
-						visited_tree[successor] = current_v
 
-						label, time = successor
-						if label == y and successor in y_list:
-							y_list.remove(successor) # to allow early exit
+					label, time = successor
+					if time <= t_omega: # no need to visit successors of a node outside the specified time interval
+						if successor not in visited_tree:
+							queue.append(successor)
+							visited_tree[successor] = current_v
 
 		print("\n[BFS] visited_tree :", visited_tree, "\n")
 
