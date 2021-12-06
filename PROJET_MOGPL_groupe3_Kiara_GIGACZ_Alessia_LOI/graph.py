@@ -66,8 +66,12 @@ class Graph:
 		x_list = self.vertices[x]
 		y_list = copy.deepcopy(self.vertices[y])
 
+		if len(x_list) <= 0 or len(y_list) <= 0:
+			print("[BFS] Aucun trajet possible entre x:", x," et y:", y," dans l'intervalle selectionné: ", interval)
+			return visited_tree 
+
 		if x_list[-1][1] < t_alpha or x_list[0][1] > t_omega or y_list[-1][1] < t_alpha or y_list[0][1] > t_omega:
-			print("[BFS] Aucun trajet possible entre x et y dans l'intervalle selectionné.")
+			print("[BFS] Aucun trajet possible entre x:", x," et y:", y," dans l'intervalle selectionné: ", interval)
 			return visited_tree 
 
 		root = None
@@ -151,7 +155,7 @@ class Graph:
 
 		return visited_tree
 
-	def Dijkstra(self, x, y, interval, duration_as_cost=False, verbose=False,):
+	def Dijkstra(self, x, y, interval, verbose=False):
 		"""
 		"""
 
@@ -162,7 +166,7 @@ class Graph:
 		y_list = copy.deepcopy(self.vertices[y])
 
 		if x_list[-1][1] < t_alpha or x_list[0][1] > t_omega or y_list[-1][1] < t_alpha or y_list[0][1] > t_omega:
-			print("Aucun trajet possible entre x et y dans l'intervalle selectionné.")
+			print("[BFS] Aucun trajet possible entre x:", x," et y:", y," dans l'intervalle selectionné: ", interval)
 			return visited_tree, ("null", -1)
 
 		root = None
@@ -188,10 +192,7 @@ class Graph:
 				print("[Dijkstra] Sommet à traiter :", current_v)
 			if current_v in self.adjacency_list.keys():
 				for successor, weight in self.adjacency_list[current_v]:
-					cost = weight
-					if duration_as_cost:
-						cost = successor[1] - current_v[1]
-					new_cost = cost_so_far[current_v] + cost
+					new_cost = cost_so_far[current_v] + weight
 					if verbose:
 						print("\tSuccesseur :", successor)
 					if successor not in visited_tree or new_cost < cost_so_far[successor]:

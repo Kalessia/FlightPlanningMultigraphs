@@ -2,8 +2,7 @@ import sys
 import re
 
 from multigraph import Multigraph 
-from minimalDistanceProblem import MinimalDistanceProblem
-
+import minimalDistanceProblem as mdp
 
 
 # -------- UTILS -------- #
@@ -28,16 +27,16 @@ def parse_multigraph(safety=True):
 		n = read_int()
 		m = read_int()
 		vertices = [read_str() for _ in range(n)]
-		edges = [read_edge() for _ in range(m)] # catch error if not enough lines
+		edges = [read_edge() for _ in range(m)]
 
 		if safety:
 			if len(vertices) != n or len(edges) != m:
 				raise ValueError
 			
-			r = re.compile("^[(][\w]*[,][\w]*[,][0-9]*[,][0-9]*[)]\n*$")
-			for e in edges:
-				if r.match(e) is None:
-					raise ValueError
+			# r = re.compile("^[(][\w]*[,][\w]*[,][0-9]*[,][0-9]*[)]\n*$")
+			# for e in edges:
+			# 	if r.match(str(e)) is None:
+			# 		raise ValueError
 	
 	except ValueError:
 		raise InputError("multigraphe") from None
@@ -69,8 +68,7 @@ def parse_problem(mg, g, safety=True):
 		if x == y:
 			raise NoPathError("Le sommet de départ et le sommet d'arrivée sont égaux.")
 
-
-	return MinimalDistanceProblem(g, x, y, interval)
+	return mdp.MinimalDistanceProblem(g, x, y, interval)
 
 
 # -------- ERRORS -------- #

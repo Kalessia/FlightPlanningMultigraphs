@@ -1,58 +1,11 @@
-from multigraph import *
-from graph import *
-from minimalDistanceProblem import *
-
-
-
-###################### A RETIRERRRRRRRRRRRRRRRRRRRRRRRRRRRRR !!!!!!!!!!!!!!!!!!!!!!! JUSTE POUR TESTER #############""
-
-from datetime import datetime
-from math import floor
-from pathlib import Path
-import random
-
-def generateGraph(nbNodes, p, lbdarange=None, t_max = 3):
-	"""
-	Randomly generates a multigraph
-
-	:param nbNodes: Number of nodes the multigraph should have
-	:param p: Probability of a node being linked to a subsequent node
-	:param lbdarange: Possible lambda values for each arc
-	:param t_max: Random variance for the date between two nodes
-	:return: A randomly generated multigraph
-	"""
-	if lbdarange is None:
-		lbdarange = [1]
-
-	nodes = [str(i) for i in range(nbNodes)]
-	arcs = set()
-	for i in range(nbNodes):
-		for j in range(i + 1, nbNodes):
-			if random.random() < p:
-				variance = [i + floor(random.uniform(0.9,1.2) * j) for i in range(0, t_max)]
-				random_t = 1 + floor(random.random() * i) + random.choice(variance)
-				arcs.add(f'({i},{j},{random_t},{random.choice(lbdarange)})')
-	lines = [str(nbNodes), str(len(arcs))]
-	lines.extend(nodes)
-	lines.extend(arcs)
-
-	newFilePath = ''
-	try:
-		Path('graphsInput').mkdir(parents=True, exist_ok=True)
-		newFilePath = f'graphsInput/multigraph-generated-{int(datetime.now().timestamp())}.mug'
-		with open(newFilePath, 'w') as f:
-			f.write('\n'.join(lines))
-		print(f'Successfully saved file at: {newFilePath}')
-	except (IOError, OSError) as e:
-		print('An error occured while saving the file: ' + e)
-
-	return newFilePath
+from multigraph import Multigraph 
+from graph import Graph
+from minimalDistanceProblem import MinimalDistanceProblem
+from utils import *
 
 # -------- MAIN -------- #
 
 def main():
-
-	generateGraph(10, 0.5)
 
 	try:
 

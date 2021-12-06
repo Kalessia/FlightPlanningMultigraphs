@@ -2,11 +2,12 @@ from itertools import *
 from gurobipy import *
 import numpy as np
 import pandas as pd
+pd.options.mode.chained_assignment = None  # default='warn'
+
 
 from multigraph import *
 from graph import *
-
-
+import utils
 
 # -------- Minimal Distance Problem (with graph transformation) -------- #
 
@@ -19,9 +20,12 @@ class MinimalDistanceProblem():
 		self.y = y
 		self.interval = interval # closed interval
 		
-		self.visited_tree = g.BFS(x, y, interval, verbose=True) # contains best predecessors
+		self.visited_tree = g.BFS(x, y, interval, verbose=False) # contains best predecessors
 		self.backwards_visited_tree = g.BFS(y, x, interval, backwards=True)
 		
+		if not(bool(self.visited_tree)):
+			raise utils.NoPathError
+
 		self.root = self.find_root()
 		self.backwards_root = self.find_root(backwards=True)
 
@@ -39,7 +43,7 @@ class MinimalDistanceProblem():
 		# 	return []
 		
 		if specific_y not in visited_tree.keys():
-			print("La destination n'était pas atteignable à partir de x.")
+			print("[traceback] Aucun trajet possible entre x:", self.x," et y:", self.y," dans l'intervalle selectionné: ", self.interval)
 			return []
 
 		if not(bool(visited_tree)):
@@ -141,8 +145,6 @@ class MinimalDistanceProblem():
 		while combinations[0][1][1] - combinations[0][0][1] <= 0:
 			combinations.pop(0)
 
-		print("fastest combinations: ", combinations)
-
 		for c in combinations:
 			specific_x, specific_y = c
 			path = self.traceback([specific_x], specific_y, self.visited_tree) # specific_y est le sommet contenant y dans l'etiquette pas encore testé avec t minimale
@@ -172,8 +174,6 @@ class MinimalDistanceProblem():
 		while combinations[0][1][1] - combinations[0][0][1] <= 0:
 			combinations.pop(0)
 
-		print("fastest combinations: ", combinations)
-
 		for c in combinations:
 			specific_x, specific_y = c
 
@@ -196,7 +196,7 @@ class MinimalDistanceProblem():
 
 		"""
 
-		visited_tree, specific_y = self.g.Dijkstra(self.x, self.y, self.interval, verbose=True)
+		visited_tree, specific_y = self.g.Dijkstra(self.x, self.y, self.interval, verbose=False)
 
 		label, time = specific_y
 		if label != self.y:
@@ -234,8 +234,6 @@ class MinimalDistanceProblem():
 		# limit solution within interval
 		specific_x = self.root
 		specific_y = self.backwards_root
-
-		print("test: ", specific_x, specific_y)
 
 		for i in range(nbcont):
 
@@ -305,22 +303,22 @@ class MinimalDistanceProblem():
 		path.sort(key = lambda tup: tup[0][1])
 		return path
 
-	def reduce_problem(self):
+	# def reduce_problem(self):
 
-		t_alpha, t_omega = self.interval
-		x_list = self.vertices[x]
-		y_list = self.vertices[y].copy()
+	# 	t_alpha, t_omega = self.interval
+	# 	x_list = self.vertices[x]
+	# 	y_list = self.vertices[y].copy()
 
-		if x_list[-1][1] < t_alpha or x_list[0][1] > t_omega or y_list[-1][1] < t_alpha or y_list[0][1] > t_omega:
-			print("[reduce_problem] Aucun trajet possible entre x et y dans l'intervalle selectionné.")
-			raise NoPathError
+	# 	if x_list[-1][1] < t_alpha or x_list[0][1] > t_omega or y_list[-1][1] < t_alpha or y_list[0][1] > t_omega:
+	# 		print("[reduce_problem] Aucun trajet possible entre x et y dans l'intervalle selectionné.")
+	# 		raise NoPathError
 
-		# To allow early exit in BFS [Optional (worth it if total nb of vertices >> len(path to y))]
-		for vertex, time in y_list:
-			if time < t_alpha or time > t_omega:
-				y_list.remove((vertex, time)) # Keeps (y, t) only if t is within interval
+	# 	# To allow early exit in BFS [Optional (worth it if total nb of vertices >> len(path to y))]
+	# 	for vertex, time in y_list:
+	# 		if time < t_alpha or time > t_omega:
+	# 			y_list.remove((vertex, time)) # Keeps (y, t) only if t is within interval
 		
-		return y_list
+	# 	return y_list
 
 	def find_root(self, backwards=False, verbose=False):
 
