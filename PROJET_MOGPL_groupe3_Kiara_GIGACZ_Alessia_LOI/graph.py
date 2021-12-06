@@ -1,3 +1,4 @@
+import datetime
 import heapq
 import networkx as nx
 import matplotlib.pyplot as plt
@@ -84,7 +85,7 @@ class Graph:
 		if verbose:
 			print("[BFS] Racine:", root)
 
-		queue = x_list.copy()
+		queue = copy.deepcopy(x_list)
 		for x in queue:
 			visited_tree[x] = None
 
@@ -168,7 +169,7 @@ class Graph:
 		return visited_tree, successor
 
 
-	# Méthode permettant d'afficher à l'écran un graphe orienté et, éventuellement, un titre
+
 	def show(self, title = "Graph"):
 		""" G : un dictionnaire representant un graphe { sommet s : sommets adjacents à s}
 		    titre : titre du graphe à afficher, 'G' par defaut
@@ -190,6 +191,6 @@ class Graph:
 
 		toPdot = nx.drawing.nx_pydot.to_pydot
 		pdot = toPdot(newG)
-		pdot.write_png("Graph.png")
+		pdot.write_png("Visualisation_graphes/Graph/" + str(datetime.date.today()) + str(datetime.datetime.now().strftime("_%H_%M_%S")) + ".jpeg", transparent = True)
 
 		plt.show()

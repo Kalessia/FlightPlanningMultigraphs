@@ -1,3 +1,4 @@
+import datetime
 import operator
 import networkx as nx
 from graph import Graph
@@ -26,8 +27,6 @@ class Multigraph:
 		"""
 		Returns a simple graph.
 		"""
-
-		# TODO: Tester si ça marche avec des arbres non connexes
 
 		newVertices = {} # {original_vertex : list of new vertices}
 		newEdges = []
@@ -91,7 +90,7 @@ class Multigraph:
 
 		toPdot = nx.drawing.nx_pydot.to_pydot
 		pdot = toPdot(newG)
-		pdot.write_png("Multigraph.png")
+		pdot.write_png("Visualisation_multigraphes/Multigraph/" + str(datetime.date.today()) + str(datetime.datetime.now().strftime("_%H_%M_%S")) + ".jpeg", transparent = True)
 
 		plt.show()
 		

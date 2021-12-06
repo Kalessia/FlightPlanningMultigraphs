@@ -149,7 +149,7 @@ def plotPerformances_n(minN, maxN, m_fixe, interval_dates_fixe, nbTests, nbItera
 			global_tEnd = time.time()
 
 			type4_LP_tStart = time.time()
-			p.shortest_LP()
+			#p.shortest_LP()
 			type4_LP_tEnd = time.time()
 
 
@@ -159,7 +159,7 @@ def plotPerformances_n(minN, maxN, m_fixe, interval_dates_fixe, nbTests, nbItera
 			tType2.append(type2_tEnd - type2_tStart)
 			tType3.append(type3_tEnd - type3_tStart)
 			tType4.append(type4_tEnd - type4_tStart)
-			tType4_LP.append(type4_LP_tEnd - type4_LP_tStart)
+			#tType4_LP.append(type4_LP_tEnd - type4_LP_tStart)
 
 			if verbose:
 				print("Temps d'executions rélatifs à l'itération n.", ite, "\n\ttGlobal :", tGlobal, "\n\ttInit :", tInit, "\n\ttType1 :", tType1, "\n\ttType2 :", tType2, "\n\ttType3 :", tType3, "\n\ttType4 :", tType4)
@@ -169,7 +169,7 @@ def plotPerformances_n(minN, maxN, m_fixe, interval_dates_fixe, nbTests, nbItera
 		ordonnee_tType2.append( (sum(tType2)/len(tType2)) )
 		ordonnee_tType3.append( (sum(tType3)/len(tType3)) )
 		ordonnee_tType4.append( (sum(tType4)/len(tType4)) )
-		ordonnee_tType4_LP.append( (sum(tType4_LP)/len(tType4_LP)) )
+		#ordonnee_tType4_LP.append( (sum(tType4_LP)/len(tType4_LP)) )
 
 
 	if verbose:
@@ -193,12 +193,12 @@ def plotPerformances_n(minN, maxN, m_fixe, interval_dates_fixe, nbTests, nbItera
 	plt.plot(abscisse_n, ordonnee_tType2, label = "type II : chemin de départ au plus tard")
 	plt.plot(abscisse_n, ordonnee_tType3, label = "type III : chemin le plus rapide")
 	plt.plot(abscisse_n, ordonnee_tType4, label = "type VI : plus court chemin")
-	plt.plot(abscisse_n, ordonnee_tType4_LP, label = "type VI LP : LP plus court chemin")
+	#plt.plot(abscisse_n, ordonnee_tType4_LP, label = "type VI LP : LP plus court chemin")
 	plt.legend()
 	
 	# Sauvegarde du tracé
 	if (save):
-		plt.savefig("TestResults_n/" + str(datetime.date.today()) + str(datetime.datetime.now().strftime("_%H_%M_%S")) + ".jpeg", transparent = True)
+		plt.savefig("TestsResults/TestResults_n/" + str(datetime.date.today()) + str(datetime.datetime.now().strftime("_%H_%M_%S")) + ".jpeg", transparent = True)
 	
 	plt.show()
 
@@ -266,7 +266,7 @@ def plotPerformances_m(n_fixe, minM, maxM, interval_dates_fixe, nbTests, nbItera
 			global_tEnd = time.time()
 
 			type4_LP_tStart = time.time()
-			p.shortest_LP()
+			#p.shortest_LP()
 			type4_LP_tEnd = time.time()
 
 
@@ -276,7 +276,7 @@ def plotPerformances_m(n_fixe, minM, maxM, interval_dates_fixe, nbTests, nbItera
 			tType2.append(type2_tEnd - type2_tStart)
 			tType3.append(type3_tEnd - type3_tStart)
 			tType4.append(type4_tEnd - type4_tStart)
-			tType4_LP.append(type4_LP_tEnd - type4_LP_tStart)
+			#tType4_LP.append(type4_LP_tEnd - type4_LP_tStart)
 
 			if verbose:
 				print("Temps d'executions rélatifs à l'itération n.", ite, "\n\ttGlobal :", tGlobal, "\n\ttInit :", tInit, "\n\ttType1 :", tType1, "\n\ttType2 :", tType2, "\n\ttType3 :", tType3, "\n\ttType4 :", tType4)
@@ -286,7 +286,7 @@ def plotPerformances_m(n_fixe, minM, maxM, interval_dates_fixe, nbTests, nbItera
 		ordonnee_tType2.append( (sum(tType2)/len(tType2)) )
 		ordonnee_tType3.append( (sum(tType3)/len(tType3)) )
 		ordonnee_tType4.append( (sum(tType4)/len(tType4)) )
-		ordonnee_tType4_LP.append( (sum(tType4_LP)/len(tType4_LP)) )
+		#ordonnee_tType4_LP.append( (sum(tType4_LP)/len(tType4_LP)) )
 
 
 	if verbose:
@@ -308,12 +308,12 @@ def plotPerformances_m(n_fixe, minM, maxM, interval_dates_fixe, nbTests, nbItera
 	plt.plot(abscisse_m, ordonnee_tType2, label = "type II : chemin de départ au plus tard")
 	plt.plot(abscisse_m, ordonnee_tType3, label = "type III : chemin le plus rapide")
 	plt.plot(abscisse_m, ordonnee_tType4, label = "type VI : plus court chemin")
-	plt.plot(abscisse_m, ordonnee_tType4_LP, label = "type VI LP : LP plus court chemin")
+	#plt.plot(abscisse_m, ordonnee_tType4_LP, label = "type VI LP : LP plus court chemin")
 
 
 	# Sauvegarde du tracé
 	if (save):
-		plt.savefig("TestResults_m/" + str(datetime.date.today()) + str(datetime.datetime.now().strftime("_%H_%M_%S")) + ".jpeg", transparent = True)
+		plt.savefig("TestsResults/TestsResults/m/" + str(datetime.date.today()) + str(datetime.datetime.now().strftime("_%H_%M_%S")) + ".jpeg", transparent = True)
 	
 	plt.show()
 
@@ -380,7 +380,7 @@ def plotPerformances_d(n_fixe, m_fixe, maxInterval_dates, nbTests, nbIterations,
 			global_tEnd = time.time()
 
 			type4_LP_tStart = time.time()
-			p.shortest_LP()
+			#p.shortest_LP()
 			type4_LP_tEnd = time.time()
 
 
@@ -390,7 +390,7 @@ def plotPerformances_d(n_fixe, m_fixe, maxInterval_dates, nbTests, nbIterations,
 			tType2.append(type2_tEnd - type2_tStart)
 			tType3.append(type3_tEnd - type3_tStart)
 			tType4.append(type4_tEnd - type4_tStart)
-			tType4_LP.append(type4_LP_tEnd - type4_LP_tStart)
+			#tType4_LP.append(type4_LP_tEnd - type4_LP_tStart)
 
 
 			if verbose:
@@ -401,7 +401,7 @@ def plotPerformances_d(n_fixe, m_fixe, maxInterval_dates, nbTests, nbIterations,
 		ordonnee_tType2.append( (sum(tType2)/len(tType2)) )
 		ordonnee_tType3.append( (sum(tType3)/len(tType3)) )
 		ordonnee_tType4.append( (sum(tType4)/len(tType4)) )
-		ordonnee_tType4_LP.append( (sum(tType4)_LP/len(tType4_LP)) )
+		#ordonnee_tType4_LP.append( (sum(tType4_LP)/len(tType4_LP)) )
 
 
 	if verbose:
@@ -423,11 +423,11 @@ def plotPerformances_d(n_fixe, m_fixe, maxInterval_dates, nbTests, nbIterations,
 	plt.plot(abscisse_d, ordonnee_tType2, label = "type II : chemin de départ au plus tard")
 	plt.plot(abscisse_d, ordonnee_tType3, label = "type III : chemin le plus rapide")
 	plt.plot(abscisse_d, ordonnee_tType4, label = "type VI : plus court chemin")
-	plt.plot(abscisse_d, ordonnee_tType4_LP, label = "type VI LP : plus court chemin")
+	#plt.plot(abscisse_d, ordonnee_tType4_LP, label = "type VI LP : plus court chemin")
 
 	# Sauvegarde du tracé
 	if (save):
-		plt.savefig("TestResults_interval_dates/" + str(datetime.date.today()) + str(datetime.datetime.now().strftime("_%H_%M_%S")) + ".jpeg", transparent = True)
+		plt.savefig("TestsResults/TestResults_interval_dates/" + str(datetime.date.today()) + str(datetime.datetime.now().strftime("_%H_%M_%S")) + ".jpeg", transparent = True)
 	
 	plt.show()
 
