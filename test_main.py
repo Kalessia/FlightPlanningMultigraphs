@@ -33,7 +33,7 @@ def main():
 		print("Chemin de type III (Chemin le plus rapide) :", type3)
 		type4 = p.shortest()
 		print("Chemin de type IV (Chemin le plus court) :", type4)
-		#type4_gurobi = p.shortest_gurobi()
+		type4_gurobi = p.shortest_LP()
 		#print("Chemin de type IV (Chemin le plus court) calculé avec PL :", type4_gurobi)
 
 	except NoPathError:
