@@ -1,7 +1,8 @@
-from multigraph import Multigraph 
-from graph import Graph
-from minimalDistanceProblem import MinimalDistanceProblem
-from utils import *
+from multigraph import *
+from graph import *
+from minimalDistanceProblem import *
+
+
 
 # -------- MAIN -------- #
 

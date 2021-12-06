@@ -4,6 +4,8 @@ import re
 from multigraph import Multigraph 
 from minimalDistanceProblem import MinimalDistanceProblem
 
+
+
 # -------- UTILS -------- #
 
 def read_str(): return sys.stdin.readline().strip()
@@ -31,7 +33,12 @@ def parse_multigraph(safety=True):
 		if safety:
 			if len(vertices) != n or len(edges) != m:
 				raise ValueError
-
+			
+			r = re.compile("^[(][\w]*[,][\w]*[,][0-9]*[,][0-9]*[)]\n*$")
+			for e in edges:
+				if r.match(e) is None:
+					raise ValueError
+	
 	except ValueError:
 		raise InputError("multigraphe") from None
 
@@ -61,18 +68,10 @@ def parse_problem(mg, g, safety=True):
 			raise NoPathError("Le sommet d'arrivée n'est pas dans le graphe.")
 		if x == y:
 			raise NoPathError("Le sommet de départ et le sommet d'arrivée sont égaux.")
-		
+
+
 	return MinimalDistanceProblem(g, x, y, interval)
-	
-	# for i in range(2, len(lignes)):
-	# 	r = re.compile("^[(][\w]*[,][\w]*[,][0-9]*[,][0-9]*[)]\n*$")
-	# 	if r.match(lignes[i]) is not None:
-	# 		# format d'un arc : (source, dest, int(time), int(weight))
-	# 		e = lignes[i].split("(")[1].split(")")[0].split(",")
-	# 		edges.append((e[0], e[1], int(e[2]), int(e[3])))
-	# 		print((e[0], e[1], int(e[2]), int(e[3])))
-	# 	else :
-	# 		vertices.append(lignes[i].split("\n")[0])
+
 
 # -------- ERRORS -------- #
 

@@ -1,12 +1,11 @@
-from itertools import combinations
+from itertools import *
 from gurobipy import *
 import numpy as np
 import pandas as pd
 
-from multigraph import Multigraph 
-from graph import Graph
+from multigraph import *
+from graph import *
 
-#from gurobi_type4 import shortest_PL as pl
 
 
 # -------- Minimal Distance Problem (with graph transformation) -------- #
