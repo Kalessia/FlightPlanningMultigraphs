@@ -112,7 +112,45 @@ class Graph:
 
 		return visited_tree
 
-	def Dijkstra(self, x, y, interval, verbose=False):
+	def BFS_fastest(self, specific_x, specific_y, interval, verbose=False):
+		"""
+		Returns the visited tree between x and y.
+
+		Assumption: no cycles in the graph.
+		"""
+
+		t_alpha, t_omega = interval
+		
+		visited_tree = {} # key: successor of the parent (child), value: parent
+
+		queue = [specific_x]
+		visited_tree[specific_x] = None
+
+		while len(queue) > 0 : # complexity of len() in python : O(1), in other languages use counter to optimise
+			
+			current_v = queue.pop(0)
+			
+			if verbose:
+				print("\n[BFS] Etat de la file :", queue)
+				print("[BFS] Sommet à traiter :", current_v)
+			
+			if current_v in self.adjacency_list.keys():
+				for successor, weight in self.adjacency_list[current_v]:
+
+					if verbose:
+						print("\tSuccesseur :", successor)
+
+					label, time = successor
+					if time <= t_omega: # no need to visit successors of a node outside the specified time interval
+						if successor not in visited_tree:
+							queue.append(successor)
+							visited_tree[successor] = current_v
+
+		print("\n[BFS] visited_tree :", visited_tree, "\n")
+
+		return visited_tree
+
+	def Dijkstra(self, x, y, interval, duration_as_cost=False, verbose=False,):
 		"""
 		"""
 
@@ -143,14 +181,16 @@ class Graph:
 
 		while (len(priorityQ) > 0 and len(y_list) > 0): # complexity of len() in python : O(1), in other languages use counter to optimise
 			
-			time, label = heapq.heappop(priorityQ)
-			current_v = label
+			time, current_v = heapq.heappop(priorityQ)
 			if verbose:
 				print("\n[Dijkstra] Etat de la file :", priorityQ)
 				print("[Dijkstra] Sommet à traiter :", current_v)
 			if current_v in self.adjacency_list.keys():
 				for successor, weight in self.adjacency_list[current_v]:
-					new_cost = cost_so_far[current_v] + weight
+					cost = weight
+					if duration_as_cost:
+						cost = successor[1] - current_v[1]
+					new_cost = cost_so_far[current_v] + cost
 					if verbose:
 						print("\tSuccesseur :", successor)
 					if successor not in visited_tree or new_cost < cost_so_far[successor]:
@@ -166,7 +206,6 @@ class Graph:
 		print("\n[Dijkstra] visited_tree :", visited_tree, "\n")
 
 		return visited_tree, successor
-
 
 	# Méthode permettant d'afficher à l'écran un graphe orienté et, éventuellement, un titre
 	def show(self, title = "Graph"):

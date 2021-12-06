@@ -19,8 +19,12 @@ class MinimalDistanceProblem():
 		self.x = x
 		self.y = y
 		self.interval = interval # closed interval
-		self.visited_tree = g.BFS(x, y, interval) # contains best predecessors
+		
+		self.visited_tree = g.BFS(x, y, interval, verbose=True) # contains best predecessors
 		self.backwards_visited_tree = g.BFS(y, x, interval, backwards=True)
+		
+		self.root = self.find_root()
+		self.backwards_root = self.find_root(backwards=True)
 
 	def traceback(self, x_list, specific_y, visited_tree, backwards=False, verbose=False):
 		"""
@@ -154,13 +158,46 @@ class MinimalDistanceProblem():
 
 		return path
 
+	def fastest_slow(self, verbose=False):
+
+		if self.x == self.y:
+			return [x]
+	
+		x_list = self.g.vertices[self.x]
+		y_list = self.g.vertices[self.y]
+
+		combinations = [(x,y) for x in x_list for y in y_list]
+		combinations.sort(key=lambda tup: tup[1][1]-tup[0][1]) # sorts in place by duration: t(y) - t(x)
+
+		# Removes t(y) - t(x) <= 0 as they are impossible
+		while combinations[0][1][1] - combinations[0][0][1] <= 0:
+			combinations.pop(0)
+
+		print("fastest combinations: ", combinations)
+
+		for c in combinations:
+			specific_x, specific_y = c
+
+			visited_tree = self.g.BFS_fastest(specific_x, specific_y, self.interval)
+			path = self.traceback([specific_x], specific_y, visited_tree) # specific_y est le sommet contenant y dans l'etiquette pas encore testé avec t minimale
+			if len(path) > 0:
+				if verbose:
+					print("Chemin de plus courte durée :", path)
+				return path
+
+		if verbose:
+			print("Il n'existe aucun chemin de x à y.")	
+			return []
+
+		return path
+
 	def shortest(self):
 		"""
 		Returns a path from x to y for which the sum of the arc weights is minimal.
 
 		"""
 
-		visited_tree, specific_y = self.g.Dijkstra(self.x, self.y, self.interval)
+		visited_tree, specific_y = self.g.Dijkstra(self.x, self.y, self.interval, verbose=True)
 
 		label, time = specific_y
 		if label != self.y:
@@ -168,11 +205,11 @@ class MinimalDistanceProblem():
 
 		return self.traceback(self.g.vertices[self.x], specific_y, visited_tree)
 
-	def shortest_LP(self):
+	def shortest_LP(self, verbose=False):
 
 		nbcont = self.g.n
 		nbvar = self.g.m
-		print("nbcont: ", nbcont, "nbvar: ", nbvar)
+		print("nbcont: ", nbcont, ", nbvar: ", nbvar)
 
 		vertices = [v for v_list in self.g.vertices.values() for v in v_list]
 		edges = self.g.edges
@@ -194,8 +231,12 @@ class MinimalDistanceProblem():
 
 		source_index = -1
 		dest_index = -1
-		specific_x = self.g.vertices[self.x][0]
-		specific_y = self.g.vertices[self.y][0]
+
+		# limit solution within interval
+		specific_x = self.root
+		specific_y = self.backwards_root
+
+		print("test: ", specific_x, specific_y)
 
 		for i in range(nbcont):
 
@@ -203,11 +244,9 @@ class MinimalDistanceProblem():
 			
 			if vertice == specific_x:
 				source_index = i
+
 			elif vertice == specific_y:
 				dest_index = i
-				# for prev, weight in backwards_adjacency_list[vertice]:
-				# 	constraints[str((prev, vertice, weight))][str(vertice)] = 1
-				# continue
 
 			for prev, weight in backwards_adjacency_list[vertice]: # -1 for all entering arcs
 				constraints[str((prev, vertice, weight))][str(vertice)] = -1
@@ -250,13 +289,61 @@ class MinimalDistanceProblem():
 		# Résolution
 		m.optimize()
 
-		print("")
-		print('Solution optimale:')
-		for j in columns:
-			print(variables[j], '=', x[j].x)
-		print("")
-		print('Valeur de la fonction objectif :', m.objVal)
+		if verbose:
+			print("")
+			print('Solution optimale:')
+			for j in columns:
+				print(variables[j], '=', x[j].x)
+			print("")
+			print('Valeur de la fonction objectif :', m.objVal)
 
+		path = []
+
+		for j in columns:
+			if x[j].x == 1.0:
+				path.append(edges[j])
+
+		path.sort(key = lambda tup: tup[0][1])
+		return path
+
+	def reduce_problem(self):
+
+		t_alpha, t_omega = self.interval
+		x_list = self.vertices[x]
+		y_list = self.vertices[y].copy()
+
+		if x_list[-1][1] < t_alpha or x_list[0][1] > t_omega or y_list[-1][1] < t_alpha or y_list[0][1] > t_omega:
+			print("[reduce_problem] Aucun trajet possible entre x et y dans l'intervalle selectionné.")
+			raise NoPathError
+
+		# To allow early exit in BFS [Optional (worth it if total nb of vertices >> len(path to y))]
+		for vertex, time in y_list:
+			if time < t_alpha or time > t_omega:
+				y_list.remove((vertex, time)) # Keeps (y, t) only if t is within interval
+		
+		return y_list
+
+	def find_root(self, backwards=False, verbose=False):
+
+		t_alpha, t_omega = self.interval
+
+		root = None
+
+		if backwards:
+			for vertex, time in reversed(self.g.vertices[self.y]): 
+				if time <= t_omega:
+					root = (vertex, time) # root: vertex labeled with x which has the latest time
+					break
+		else:
+			for vertex, time in self.g.vertices[self.x]: 
+				if time >= t_alpha:
+					root = (vertex, time) # root: vertex labeled with x which has the earliest time
+					break
+		
+		if verbose:
+			print("[find_root] Racine:", root)
+
+		return root
 
 	def show_visited_tree(self, visited_tree, title = "Visited tree"):
 		""" G : un dictionnaire representant un graphe { sommet s : sommets adjacents à s}
