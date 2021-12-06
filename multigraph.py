@@ -81,15 +81,12 @@ class Multigraph:
 		plt.title(title)
 		pos = nx.circular_layout(newG)
 		e_labels = nx.get_edge_attributes(newG, 'weight')
-		nx.draw_networkx(newG, pos=pos, arrows=True, with_labels=True)
-		nx.draw_networkx_edge_labels(newG, pos = pos, label_pos=0.5, font_size=10)
-		
+		nx.draw_networkx_edge_labels(newG, pos=pos, edge_labels=e_labels)
+		nx.draw(newG, with_labels=True, node_size=1500, pos=pos)
+
 		toPdot = nx.drawing.nx_pydot.to_pydot
 		pdot = toPdot(newG)
-		# nx.draw(newG, edges_labels=True)
-
 		pdot.write_png("Multigraph.png")
+
 		plt.show()
 		
-		# nx.draw_networkx_edge_labels(newG, pos=pos, edge_labels=e_labels)
-		# nx.draw(newG, with_labels=True, node_size=1500, pos=pos)
