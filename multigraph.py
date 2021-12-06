@@ -31,6 +31,7 @@ class Multigraph:
 
 		newVertices = {} # {original_vertex : list of new vertices}
 		newEdges = []
+		newN = 0
 
 		for vertex in self.vertices:
 			newVertices[vertex] = []
@@ -41,11 +42,13 @@ class Multigraph:
 			u = (source, t)
 			if u not in newVertices[source]:
 				newVertices[source].append(u)
+				newN += 1
 
 			# vIN(sommet multiGraphe) = liste de doublets (v, t) avec v = sommet multiGraphe et t = poids (date) de l'arc entrant de v + lambda
 			v = (dest, t + weight)
 			if v not in newVertices[dest]:
 				newVertices[dest].append(v)
+				newN += 1
 
 			e = (u, v, weight)
 			newEdges.append(e)
@@ -61,7 +64,7 @@ class Multigraph:
 				e = (to_visit[i], to_visit[i+1], 0)
 				newEdges.append(e)
 
-		return Graph(self.n, self.m, newVertices, newEdges)
+		return Graph(newN, len(newEdges), newVertices, newEdges)
 
 	# Méthode permettant d'afficher à l'écran un multigraphe orienté et, éventuellement, un titre
 	def show(self, title = "Multigraph"):
