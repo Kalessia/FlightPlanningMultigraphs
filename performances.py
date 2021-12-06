@@ -4,7 +4,6 @@ from minimalDistanceProblem import MinimalDistanceProblem
 import time
 import datetime
 
-from math import floor, ceil 
 import random
 import scipy.stats as st
 import numpy as np
@@ -23,108 +22,164 @@ def randomMultigraphe(n, m, interval_dates):
 		return None
 
 	vertices = ["s"+str(i) for i in range(n)]
-	
-	arcsADistribuer = m
 	edges = []
+
+	arcsADistribuer = m-n
+	tabNbSuccesseurs = [1] * n
+
 	z = random.randint(1, int(np.log(n)) + 1) # nombre de feuilles (sommets finaux sans successeurs) souhaitées ; fonction logarithme népérien
 	l = random.randint(1, int((n % m)) + 1) # lambda
-	k = z*3 + 1 # nombre de arcs supplementaires que on réserve pour les sommets racine et feuilles
 
-	# Parametrisation de truncnorm( (low - mean) / sd, (upp - mean) / sd, loc=mean, scale=sd )
+	# Parametrage de truncnorm( (low - mean) / sd, (upp - mean) / sd, loc=mean, scale=sd )
 	borneInf = interval_dates[0] # low
 	borneSup = interval_dates[1] # upp
 	ecartType = int(interval_dates[1]/5) # sd
 	# la moyenne mean vaut l'index du sommet en cours de traitement
 
-	for i in range(m):
+	# Choix du nombre de successeurs pour chaque sommet s(i) dans la limite de m totales
+	while arcsADistribuer > 0:
+		i = random.randint(0,n-1)
+		tabNbSuccesseurs[i] += 1
+		arcsADistribuer -= 1
 
-		if arcsADistribuer < 1:
-			break
 
-		# On attribue les premieres n-1 arcs pour rélier tous les sommets, tel que tout sommet est rélié à au moins un autre sommet
-		if (i < n - 1):
+	for i in range(len(tabNbSuccesseurs)-1):
+		edges.append((vertices[i], vertices[i+1], borneInf, l))
+		p = random.uniform(0,1)
 
-			
-			print("on rentre car i =", i)
-			source = vertices[i]
-			
-			print("il manque a distribuer :", arcsADistribuer)
-
-			nbSuccesseursSource = random.randint(1, int(((arcsADistribuer % n))/2) + 1)					
-			if (nbSuccesseursSource > len(vertices) - i - 2):
-				nbSuccesseursSource = 1
-			print("nbSuccesseursSource", nbSuccesseursSource)
-			# if ( (i + nbSuccesseursSource) > n ):
-			# 	print("en effet:", i + nbSuccesseursSource, ">", n, "donc", n - i - 1 )
-			# 	nbSuccesseursSource = n - i - 1
-			for j in range(1, nbSuccesseursSource+1):
-				dest = vertices[i+j]
+		# Probabilité de l'attribuire aux premieres cases
+		if (p < 0.2) :
+			source = vertices[0] # racine
+			for j in range(1, tabNbSuccesseurs[i]):
+				dest = random.choice(vertices[1:z+2]) # choix parmi les premiers z sommets sauf la racine
 				date = st.truncnorm.rvs( (borneInf - int(source[1])) / ecartType, (borneSup - int(source[1])) / ecartType, loc=int(source[1]), scale=ecartType )
-				edges.append((source, dest, int(date), l))	# format arc : (source : str, dest : str, date : int, lambda l : int)
-				arcsADistribuer -= 1
-				print(i, "apres 1 :", arcsADistribuer)
-				if arcsADistribuer == 0:
-					break
+				edges.append((source, dest, int(date), l))
+		
+		elif (p > 0.8) : # Probabilité de l'attribuire aux dernieres cases
+			source = random.choice(vertices[:-(z+2)]) # choix parmi les z*3 derniers sommets
+			for j in range(1, tabNbSuccesseurs[i]):
+				dest = random.choice(vertices[vertices.index(source)+1:])
+				date = st.truncnorm.rvs( (borneInf - int(source[1])) / ecartType, (borneSup - int(source[1])) / ecartType, loc=int(source[1]), scale=ecartType )
+				edges.append((source, dest, int(date), l))
+		
+		else:
+			nbS = tabNbSuccesseurs[i]
+			if (i+nbS < n):
+				source = vertices[i]
+			else:
+				source = vertices[n-nbS]
+
+			for j in range(1, nbS):
+				dest = vertices[vertices.index(source)+j]
+				date = st.truncnorm.rvs( (borneInf - int(source[1])) / ecartType, (borneSup - int(source[1])) / ecartType, loc=int(source[1]), scale=ecartType )
+				edges.append((source, dest, int(date), l))
+	
+	for j in range(tabNbSuccesseurs[n-1]):
+		edges.append((vertices[n-random.randint(2,n)], vertices[n-1], borneInf, l))
+
+		
+	if len(vertices) != n or len(edges) != m :
+		return None
+			
+	return Multigraph(n, m, vertices, edges)
 
 
-				# 				# Si i<n, alors il y a probablement des sommets non réliés par des arcs au multigraphe.
-				# # On rajoute la quantité minimale d'arcs à partir de ces sommets vers des successeurs pour ne pas faire planter la simulation.
-				# if (i < n) :
-				# 	print("on a i <n car i = ", i)
-				# 	nbSuccesseursSource = n-i
-				# 	for j in range(nbSuccesseursSource):
-				# 		source = vertices[i-1]
-				# 		dest = random.choice(vertices[vertices.index(source)+1:]) # tous les valeurs sauf le premier sommet (racine)
-				# 		date = st.truncnorm.rvs( (borneInf - int(source[1])) / ecartType, (borneSup - int(source[1])) / ecartType, loc=int(source[1]), scale=ecartType )
-				# 		edges.append((source, dest, int(date), l))	# format arc : (source : str, dest : str, date : int, lambda l : int)
-				# 		print(i, "apres 7 :")
+
+
+
+
+
+	
+
+
+	# for i in range(m):
+
+	# 	if arcsADistribuer < 1:
+	# 		break
+
+	# 	# On attribue les premieres n-1 arcs pour rélier tous les sommets, tel que tout sommet est rélié à au moins un autre sommet
+	# 	if (i < n - 1):
+
+			
+	# 		print("on rentre car i =", i)
+	# 		source = vertices[i]
+			
+	# 		print("il manque a distribuer :", arcsADistribuer)
+
+	# 		#nbSuccesseursSource = random.randint(1, int(((arcsADistribuer % n))/2) + 1)
+	# 		nbSuccesseursSource = 1
+			
+	# 		#if (i + nbSuccesseursSource > n):
+	# 		#	nbSuccesseursSource = n-i-1
+
+	# 		#if ((m-arcsADistribuer) < n-i):
+	# 		#	nbSuccesseursSource = 1
+
+	# 		print("nbSuccesseursSource", nbSuccesseursSource)
+
+	# 		for j in range(1, nbSuccesseursSource+1):
+	# 			dest = vertices[i+j]
+	# 			date = st.truncnorm.rvs( (borneInf - int(source[1])) / ecartType, (borneSup - int(source[1])) / ecartType, loc=int(source[1]), scale=ecartType )
+	# 			edges.append((source, dest, int(date), l))	# format arc : (source : str, dest : str, date : int, lambda l : int)
+	# 			arcsADistribuer -= 1
+	# 			print(i, "apres 1 :", arcsADistribuer)
+	# 			if arcsADistribuer == 0:
+	# 				break
+
+
+	# 			# 				# Si i<n, alors il y a probablement des sommets non réliés par des arcs au multigraphe.
+	# 			# # On rajoute la quantité minimale d'arcs à partir de ces sommets vers des successeurs pour ne pas faire planter la simulation.
+	# 			# if (i < n) :
+	# 			# 	print("on a i <n car i = ", i)
+	# 			# 	nbSuccesseursSource = n-i
+	# 			# 	for j in range(nbSuccesseursSource):
+	# 			# 		source = vertices[i-1]
+	# 			# 		dest = random.choice(vertices[vertices.index(source)+1:]) # tous les valeurs sauf le premier sommet (racine)
+	# 			# 		date = st.truncnorm.rvs( (borneInf - int(source[1])) / ecartType, (borneSup - int(source[1])) / ecartType, loc=int(source[1]), scale=ecartType )
+	# 			# 		edges.append((source, dest, int(date), l))	# format arc : (source : str, dest : str, date : int, lambda l : int)
+	# 			# 		print(i, "apres 7 :")
 
 				
 
-		# On s'assure de réserver les derniers arcs à distribuer pour les sommets racine et feuilles
-		elif (arcsADistribuer < k):
-			print("k =", k)
-			x = arcsADistribuer # <--------------------------- ne surtout pas effacer ce passage XD
-			for j in range(floor(x/2)): # floor : partie entière inférieure
-				print("test arcsADistribuer", arcsADistribuer)
-				print("test repartition", floor(arcsADistribuer/2), ceil(arcsADistribuer/2))
-				source = vertices[0] # racine
-				dest = random.choice(vertices[1:z+2]) # choix parmi les premiers z sommets sauf la racine
-				print("ja", j)
-				date = st.truncnorm.rvs( (borneInf - int(source[1])) / ecartType, (borneSup - int(source[1])) / ecartType, loc=int(source[1]), scale=ecartType )
-				edges.append((source, dest, int(date), l))
-				arcsADistribuer -= 1
-				print(i, "apres 2a :", arcsADistribuer)
+	# 	# On s'assure de réserver les derniers arcs à distribuer pour les sommets racine et feuilles
+	# 	elif (arcsADistribuer < k):
+	# 		print("k =", k)
+	# 		x = arcsADistribuer # <--------------------------- ne surtout pas effacer ce passage XD
+	# 		for j in range(floor(x/2)): # floor : partie entière inférieure
+	# 			print("test arcsADistribuer", arcsADistribuer)
+	# 			print("test repartition", floor(arcsADistribuer/2), ceil(arcsADistribuer/2))
+	# 			source = vertices[0] # racine
+	# 			dest = random.choice(vertices[1:z+2]) # choix parmi les premiers z sommets sauf la racine
+	# 			print("ja", j)
+	# 			date = st.truncnorm.rvs( (borneInf - int(source[1])) / ecartType, (borneSup - int(source[1])) / ecartType, loc=int(source[1]), scale=ecartType )
+	# 			edges.append((source, dest, int(date), l))
+	# 			arcsADistribuer -= 1
+	# 			print(i, "apres 2a :", arcsADistribuer)
 
-			for j in range(ceil(x/2)): # floor : partie entière superièure
-				print("sono dentro b, j vale", j)
-				print("sono dentro b, ceil", ceil(arcsADistribuer/2))
-				source = random.choice(vertices[:-z*3+1]) # choix parmi les z*3 derniers sommets
-				dest = random.choice(vertices[vertices.index(source)+1:])
-				print("jb", j)
-				date = st.truncnorm.rvs( (borneInf - int(source[1])) / ecartType, (borneSup - int(source[1])) / ecartType, loc=int(source[1]), scale=ecartType )
-				edges.append((source, dest, int(date), l))
-				arcsADistribuer -= 1
-				print(i, "apres 2b :", arcsADistribuer)
+	# 		for j in range(ceil(x/2)): # floor : partie entière superièure
+	# 			print("sono dentro b, j vale", j)
+	# 			print("sono dentro b, ceil", ceil(arcsADistribuer/2))
+	# 			source = random.choice(vertices[:-z*3+1]) # choix parmi les z*3 derniers sommets
+	# 			dest = random.choice(vertices[vertices.index(source)+1:])
+	# 			print("jb", j)
+	# 			date = st.truncnorm.rvs( (borneInf - int(source[1])) / ecartType, (borneSup - int(source[1])) / ecartType, loc=int(source[1]), scale=ecartType )
+	# 			edges.append((source, dest, int(date), l))
+	# 			arcsADistribuer -= 1
+	# 			print(i, "apres 2b :", arcsADistribuer)
 
-			break
+	# 		break
 
-		# Si les 2 cas précedents sont réspectés, le reste des arcs est distribué aléatoirement
-		else:
-			source = random.choice(vertices[:-z]) # tous les valeurs sauf le derniers z sommets (feuilles)
-			dest = random.choice(vertices[vertices.index(source)+1:]) # tous les valeurs sauf le premier sommet (racine)
-			date = st.truncnorm.rvs( (borneInf - int(source[1])) / ecartType, (borneSup - int(source[1])) / ecartType, loc=int(source[1]), scale=ecartType )
-			edges.append((source, dest, int(date), l))	# format arc : (source : str, dest : str, date : int, lambda l : int)
-			arcsADistribuer -= 1
-			print(i, "apres 3 :", arcsADistribuer)
+	# 	# Si les 2 cas précedents sont réspectés, le reste des arcs est distribué aléatoirement
+	# 	else:
+	# 		source = random.choice(vertices[:-z]) # tous les valeurs sauf le derniers z sommets (feuilles)
+	# 		dest = random.choice(vertices[vertices.index(source)+1:]) # tous les valeurs sauf le premier sommet (racine)
+	# 		date = st.truncnorm.rvs( (borneInf - int(source[1])) / ecartType, (borneSup - int(source[1])) / ecartType, loc=int(source[1]), scale=ecartType )
+	# 		edges.append((source, dest, int(date), l))	# format arc : (source : str, dest : str, date : int, lambda l : int)
+	# 		arcsADistribuer -= 1
+	# 		print(i, "apres 3 :", arcsADistribuer)
 
 
-	print("len(vertices :", len(vertices), ", n :", n, ", len(edges) :", len(edges), ", m :", m)
 
-	if len(vertices) != n or len(edges) != m :
-		return None
-
-	return Multigraph(n, m, vertices, edges)
 
 
 
@@ -287,7 +342,6 @@ def plotPerformances_n(minN, maxN, m_fixe, interval_dates_fixe, nbTests, nbItera
 		x = "s0"
 		y = "s" + str(n-1)
 
-		print("x =", x, "y=", y)
 		abscisse_n.append(n)
 
 		# Méthode permettant de générer des graphes aléatoires
@@ -606,14 +660,15 @@ def performances():
 	m_fixe = 100
 	interval_dates_fixe = [1,10]
 
-	plotPerformances_n(minN, maxN, m_fixe, interval_dates_fixe, nbTests, nbIterations, save)
+
+	#plotPerformances_n(minN, maxN, m_fixe, interval_dates_fixe, nbTests, nbIterations, save)
 	#plotPerformances_m(n_fixe, minM, maxM, interval_dates_fixe, nbTests, nbIterations, save)
 	#plotPerformances_d(n_fixe, m_fixe, maxInterval_dates, nbTests, nbIterations, save)
 
-	#rmg = randomMultigraphe(10, 30, [0,10])
+	rmg = randomMultigraphe(10, 30, [0,10])
 
-	#if rmg != None :
-	#	rmg.showMultigraphe()
+	if rmg != None :
+		rmg.show()
 	
 
 
