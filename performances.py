@@ -287,6 +287,7 @@ def plotPerformances_n(minN, maxN, m_fixe, interval_dates_fixe, nbTests, nbItera
 		x = "s0"
 		y = "s" + str(n-1)
 
+		print("x =", x, "y=", y)
 		abscisse_n.append(n)
 
 		# Méthode permettant de générer des graphes aléatoires

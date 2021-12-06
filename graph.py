@@ -66,7 +66,6 @@ class Graph:
 		x_list = self.vertices[x]
 		y_list = copy.deepcopy(self.vertices[y])
 
-		print("x_list", x_list, "y_list", y_list)
 		if x_list[-1][1] < t_alpha or x_list[0][1] > t_omega or y_list[-1][1] < t_alpha or y_list[0][1] > t_omega:
 			print("[BFS] Aucun trajet possible entre x et y dans l'intervalle selectionné.")
 			return visited_tree 
