@@ -67,7 +67,7 @@ class Multigraph:
 		return Graph(newN, len(newEdges), newVertices, newEdges)
 
 	# Méthode permettant d'afficher à l'écran un multigraphe orienté et, éventuellement, un titre
-	def show(self, title = "Multigraph"):
+	def show(self, title = "Multigraphe pondere par le temps"):
 		""" G : un dictionnaire representant un graphe { sommet s : sommets adjacents à s}
 		    titre : titre du graphe à afficher, 'G' par defaut
 		"""
@@ -80,8 +80,13 @@ class Multigraph:
 
 		plt.title(title)
 		pos = nx.circular_layout(newG)
+
+		dict_labels = {}
 		e_labels = nx.get_edge_attributes(newG, 'weight')
-		nx.draw_networkx_edge_labels(newG, pos=pos, edge_labels=e_labels)
+		for u, v, w in e_labels:
+			dict_labels[(u,v)] = w
+
+		nx.draw_networkx_edge_labels(newG, pos=pos, edge_labels=dict_labels)
 		nx.draw(newG, with_labels=True, node_size=1500, pos=pos)
 
 		toPdot = nx.drawing.nx_pydot.to_pydot

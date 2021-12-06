@@ -287,11 +287,13 @@ def plotPerformances_n(minN, maxN, m_fixe, interval_dates_fixe, nbTests, nbItera
 		x = "s0"
 		y = "s" + str(n-1)
 
+		print("x =", x, "y=", y)
 		abscisse_n.append(n)
 
 		# Méthode permettant de générer des graphes aléatoires
 		init_tStart = time.time() # init = initialisation programme = transformation en graphe + calcul d'arbre couvrant
 		mg = randomMultigraphe(n, m_fixe, interval_dates_fixe)
+		mg.show()
 		g = mg.transform_to_graph()
 		g.show()
 		p = MinimalDistanceProblem(g, x, y, interval_dates_fixe)
@@ -399,7 +401,6 @@ def plotPerformances_m(n_fixe, minM, maxM, interval_dates_fixe, nbTests, nbItera
 		init_tStart = time.time() # init = initialisation programme = transformation en graphe + calcul d'arbre couvrant
 		mg = randomMultigraphe(n_fixe, m, interval_dates_fixe)
 		g = mg.transform_to_graph()
-		g.show()
 		p = MinimalDistanceProblem(g, x, y, interval_dates_fixe)
 		init_tEnd = time.time()
 		ordonnee_tInit.append(init_tEnd - init_tStart)
@@ -495,13 +496,13 @@ def plotPerformances_d(n_fixe, m_fixe, maxInterval_dates, nbTests, nbIterations,
 		x = "s0"
 		y = "s" + str(n_fixe-1)
 
-		abscisse_d.append(d)
+
+		abscisse_d.append("[" + str(maxInterval_dates[0]/nbTests*nb) + "," + str(maxInterval_dates[1]/nbTests*nb) + "]")
 
 		# Méthode permettant de générer des graphes aléatoires
 		init_tStart = time.time() # init = initialisation programme = transformation en graphe + calcul d'arbre couvrant
-		mg = randomMultigraphe(n_fixe, m, interval_dates)
+		mg = randomMultigraphe(n_fixe, m_fixe, interval_dates)
 		g = mg.transform_to_graph()
-		g.show()
 		p = MinimalDistanceProblem(g, x, y, interval_dates)
 		init_tEnd = time.time()
 		ordonnee_tInit.append(init_tEnd - init_tStart)
@@ -605,17 +606,15 @@ def performances():
 	m_fixe = 100
 	interval_dates_fixe = [1,10]
 
-	#plotPerformances_n(minN, maxN, m_fixe, interval_dates_fixe, nbTests, nbIterations, save)
+	plotPerformances_n(minN, maxN, m_fixe, interval_dates_fixe, nbTests, nbIterations, save)
 	#plotPerformances_m(n_fixe, minM, maxM, interval_dates_fixe, nbTests, nbIterations, save)
 	#plotPerformances_d(n_fixe, m_fixe, maxInterval_dates, nbTests, nbIterations, save)
 
-	rmg = randomMultigraphe(10, 30, [0,10])
+	#rmg = randomMultigraphe(10, 30, [0,10])
 
-	if rmg != None :
-		rmg.show()
+	#if rmg != None :
+	#	rmg.showMultigraphe()
 	
-
-	print(rmg)
 
 
 
