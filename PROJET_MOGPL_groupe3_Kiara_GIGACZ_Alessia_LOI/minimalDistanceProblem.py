@@ -82,7 +82,7 @@ class MinimalDistanceProblem():
 		"""
 
 		if self.x == self.y:
-			return [x]
+			return [self.x]
 
 		x_list = self.g.vertices[self.x]
 		y_list = self.g.vertices[self.y]
@@ -91,7 +91,7 @@ class MinimalDistanceProblem():
 			print("Liste des noeuds contenant y dans leur étiquette triée par t croissant:", y_list)
 			print("Liste des noeuds contenant x dans leur étiquette :", x_list)
 
-		# Pour chaque sommet dans la liste y_list, vérifier s' il existe un chemin de x à y en remontant le sens des arcs de G’.
+		# Pour chaque sommet dans la liste y_list, vérifier s'il existe un chemin de x à y en remontant le sens des arcs de G’.
 		# L’algorithme s'arrête au premier chemin de x à y trouvé
 
 		for specific_y in y_list:
@@ -112,7 +112,7 @@ class MinimalDistanceProblem():
 		"""
 		
 		if self.x == self.y:
-			return [x]
+			return [self.x]
 
 		x_list = self.g.vertices[self.x]
 		y_list = self.g.vertices[self.y]
@@ -128,41 +128,10 @@ class MinimalDistanceProblem():
 			print("Il n'existe aucun chemin de x à y.")
 		return []
 
-	def fastest(self, verbose=False):
-
-		# TODO: A DEBUGGER !!
-
-		if self.x == self.y:
-			return [x]
-		
-		x_list = self.g.vertices[self.x]
-		y_list = self.g.vertices[self.y]
-
-		combinations = [(x,y) for x in x_list for y in y_list]
-		combinations.sort(key=lambda tup: tup[1][1]-tup[0][1]) # sorts in place by duration: t(y) - t(x)
-
-		# Removes t(y) - t(x) <= 0 as they are impossible
-		while combinations[0][1][1] - combinations[0][0][1] <= 0:
-			combinations.pop(0)
-
-		for c in combinations:
-			specific_x, specific_y = c
-			path = self.traceback([specific_x], specific_y, self.visited_tree) # specific_y est le sommet contenant y dans l'etiquette pas encore testé avec t minimale
-			if len(path) > 0:
-				if verbose:
-					print("Chemin de plus courte durée :", path)
-				return path
-
-		if verbose:
-			print("Il n'existe aucun chemin de x à y.")	
-			return []
-
-		return path
-
 	def fastest_slow(self, verbose=False):
 
 		if self.x == self.y:
-			return [x]
+			return [self.x]
 	
 		x_list = self.g.vertices[self.x]
 		y_list = self.g.vertices[self.y]
@@ -205,6 +174,10 @@ class MinimalDistanceProblem():
 		return self.traceback(self.g.vertices[self.x], specific_y, visited_tree)
 
 	def shortest_LP(self, verbose=False):
+		"""
+		Returns a shortest path from x to y using Gurobi.
+
+		"""
 
 		nbcont = self.g.n
 		nbvar = self.g.m
@@ -303,23 +276,6 @@ class MinimalDistanceProblem():
 		path.sort(key = lambda tup: tup[0][1])
 		return path
 
-	# def reduce_problem(self):
-
-	# 	t_alpha, t_omega = self.interval
-	# 	x_list = self.vertices[x]
-	# 	y_list = self.vertices[y].copy()
-
-	# 	if x_list[-1][1] < t_alpha or x_list[0][1] > t_omega or y_list[-1][1] < t_alpha or y_list[0][1] > t_omega:
-	# 		print("[reduce_problem] Aucun trajet possible entre x et y dans l'intervalle selectionné.")
-	# 		raise NoPathError
-
-	# 	# To allow early exit in BFS [Optional (worth it if total nb of vertices >> len(path to y))]
-	# 	for vertex, time in y_list:
-	# 		if time < t_alpha or time > t_omega:
-	# 			y_list.remove((vertex, time)) # Keeps (y, t) only if t is within interval
-		
-	# 	return y_list
-
 	def find_root(self, backwards=False, verbose=False):
 
 		t_alpha, t_omega = self.interval
@@ -365,3 +321,51 @@ class MinimalDistanceProblem():
 		pdot.write_png("VisitedTree.png")
 
 		plt.show()
+
+	# def reduce_problem(self):
+
+	# 	t_alpha, t_omega = self.interval
+	# 	x_list = self.vertices[x]
+	# 	y_list = self.vertices[y].copy()
+
+	# 	if x_list[-1][1] < t_alpha or x_list[0][1] > t_omega or y_list[-1][1] < t_alpha or y_list[0][1] > t_omega:
+	# 		print("[reduce_problem] Aucun trajet possible entre x et y dans l'intervalle selectionné.")
+	# 		raise NoPathError
+
+	# 	# To allow early exit in BFS [Optional (worth it if total nb of vertices >> len(path to y))]
+	# 	for vertex, time in y_list:
+	# 		if time < t_alpha or time > t_omega:
+	# 			y_list.remove((vertex, time)) # Keeps (y, t) only if t is within interval
+		
+	# 	return y_list
+
+	# def fastest(self, verbose=False):
+
+	# 	# TODO: A DEBUGGER !!
+
+	# 	if self.x == self.y:
+	# 		return [self.x]
+		
+	# 	x_list = self.g.vertices[self.x]
+	# 	y_list = self.g.vertices[self.y]
+
+	# 	combinations = [(x,y) for x in x_list for y in y_list]
+	# 	combinations.sort(key=lambda tup: tup[1][1]-tup[0][1]) # sorts in place by duration: t(y) - t(x)
+
+	# 	# Removes t(y) - t(x) <= 0 as they are impossible
+	# 	while combinations[0][1][1] - combinations[0][0][1] <= 0:
+	# 		combinations.pop(0)
+
+	# 	for c in combinations:
+	# 		specific_x, specific_y = c
+	# 		path = self.traceback([specific_x], specific_y, self.visited_tree) # specific_y est le sommet contenant y dans l'etiquette pas encore testé avec t minimale
+	# 		if len(path) > 0:
+	# 			if verbose:
+	# 				print("Chemin de plus courte durée :", path)
+	# 			return path
+
+	# 	if verbose:
+	# 		print("Il n'existe aucun chemin de x à y.")	
+	# 		return []
+
+	# 	return path

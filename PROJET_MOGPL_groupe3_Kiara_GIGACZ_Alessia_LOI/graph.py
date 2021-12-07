@@ -108,7 +108,7 @@ class Graph:
 						print("\tSuccesseur :", successor)
 
 					label, time = successor
-					if time <= t_omega: # no need to visit successors of a node outside the specified time interval
+					if time <= t_omega and time >= t_alpha: # no need to visit successors of a node outside the specified time interval
 						if successor not in visited_tree:
 							queue.append(successor)
 							visited_tree[successor] = current_v
@@ -119,7 +119,7 @@ class Graph:
 
 	def BFS_fastest(self, specific_x, specific_y, interval, verbose=False):
 		"""
-		Returns the visited tree between x and y.
+		Returns the visited tree between specific_x and specific_y.
 
 		Assumption: no cycles in the graph.
 		"""

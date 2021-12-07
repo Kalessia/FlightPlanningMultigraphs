@@ -14,7 +14,6 @@ verbose = False
 
 
 
-
 def randomMultigraphe(n, m, interval_dates, verbose=False):
 	"""
 	"""

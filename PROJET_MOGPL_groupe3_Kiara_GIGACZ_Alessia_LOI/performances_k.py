@@ -123,11 +123,6 @@ def randomMultigraphe(n, m, interval_dates, verbose=False):
 			
 	return Multigraph(n, m, vertices, edges)
 
-
-
-
-
-
 # Méthode permettant d'afficher un graphique de comparaison des performances ("temps de calcul" et "qualité des Solutions") de l'algorithme choisi
 def plotPerformances_n(minN, maxN, m_fixe, interval_dates_fixe, nbTests, nbIterations, verbose=False, save = False):
 	ordonnee_tGlobal = []  # liste des temps de calcul moyen, vue globale sur le programme
@@ -141,7 +136,9 @@ def plotPerformances_n(minN, maxN, m_fixe, interval_dates_fixe, nbTests, nbItera
 	abscisse_n = []
 	
 	for nb in range(1, nbTests+1):
-		# try:
+
+		gurobi = True
+
 		n = int(minN + (maxN-minN/nbTests*nb))
 		
 		x = "s0"
@@ -154,7 +151,8 @@ def plotPerformances_n(minN, maxN, m_fixe, interval_dates_fixe, nbTests, nbItera
 		mg = randomMultigraphe(n, m_fixe, interval_dates_fixe)
 		print(mg)
 		g = mg.transform_to_graph()
-		p = MinimalDistanceProblem(g, mg.vertices[0], mg.vertices[-1], (0, mg.edges[-1][2]+10))
+		#p = MinimalDistanceProblem(g, mg.vertices[0], mg.vertices[-1], (0, mg.edges[-1][2]+10))
+		p = MinimalDistanceProblem(g, x, y, interval_dates_fixe)
 		init_tEnd = time.time()
 		ordonnee_tInit.append(init_tEnd - init_tStart)
 
@@ -183,15 +181,17 @@ def plotPerformances_n(minN, maxN, m_fixe, interval_dates_fixe, nbTests, nbItera
 			type3_tEnd = time.time()
 
 			type4_tStart = time.time()
-			p.shortest()
+			path = p.shortest()
 			type4_tEnd = time.time()
 
 			global_tEnd = time.time()
 
-			# type4_LP_tStart = time.time()
-			# p.shortest_LP()
-			# type4_LP_tEnd = time.time()
-
+			type4_LP_tStart = time.time()
+			try:
+				p.shortest_LP()
+			except:
+				None
+			type4_LP_tEnd = time.time()
 
 			tGlobal.append(global_tEnd - global_tStart)
 			tInit.append(init_tEnd - init_tStart)
@@ -199,8 +199,8 @@ def plotPerformances_n(minN, maxN, m_fixe, interval_dates_fixe, nbTests, nbItera
 			tType2.append(type2_tEnd - type2_tStart)
 			tType3.append(type3_tEnd - type3_tStart)
 			tType4.append(type4_tEnd - type4_tStart)
-			#tType4_LP.append(type4_LP_tEnd - type4_LP_tStart)
-
+			tType4_LP.append(type4_LP_tEnd - type4_LP_tStart)
+			
 			if verbose:
 				print("Temps d'executions rélatifs à l'itération n.", ite, "\n\ttGlobal :", tGlobal, "\n\ttInit :", tInit, "\n\ttType1 :", tType1, "\n\ttType2 :", tType2, "\n\ttType3 :", tType3, "\n\ttType4 :", tType4)
 
@@ -214,7 +214,7 @@ def plotPerformances_n(minN, maxN, m_fixe, interval_dates_fixe, nbTests, nbItera
 		ordonnee_tType2.append( (sum(tType2)/len(tType2)) )
 		ordonnee_tType3.append( (sum(tType3)/len(tType3)) )
 		ordonnee_tType4.append( (sum(tType4)/len(tType4)) )
-		#ordonnee_tType4_LP.append( (sum(tType4_LP)/len(tType4_LP)) )
+		ordonnee_tType4_LP.append( (sum(tType4_LP)/len(tType4_LP)) )
 
 	if verbose:
 		print("Temps d'executions moyens rélatifs au test n.", nb, "\n\tordonnee_tGlobal :", ordonnee_tGlobal, "\n\tordonnee_tInit :", ordonnee_tInit, "\n\tordonnee_tType1 :", ordonnee_tType1, "\n\tordonnee_tType2 :", ordonnee_tType2, "\n\tordonnee_tType3 :", ordonnee_tType3, "\n\tordonnee_tType4 :", ordonnee_tType4)
@@ -237,7 +237,29 @@ def plotPerformances_n(minN, maxN, m_fixe, interval_dates_fixe, nbTests, nbItera
 	plt.plot(abscisse_n, ordonnee_tType2, label = "type II : chemin de départ au plus tard")
 	plt.plot(abscisse_n, ordonnee_tType3, label = "type III : chemin le plus rapide")
 	plt.plot(abscisse_n, ordonnee_tType4, label = "type VI : plus court chemin")
-	#plt.plot(abscisse_n, ordonnee_tType4_LP, label = "type VI LP : LP plus court chemin")
+	plt.plot(abscisse_n, ordonnee_tType4_LP, label = "type VI LP : LP plus court chemin")
+	plt.legend()
+	
+	# Sauvegarde du tracé
+	if (save):
+		plt.savefig("TestsResults/TestResults_n/" + str(datetime.date.today()) + str(datetime.datetime.now().strftime("_%H_%M_%S")) + ".jpeg", transparent = True)
+	
+	plt.show()
+
+
+	#Affichage graphique
+	plt.figure()
+	plt.suptitle("Performances", size = 20, color = 'red')
+	plt.rc('xtick', labelsize=10)    # fontsize of the tick labels
+	plt.grid(True)
+
+	# Construction et affichage du tracé "temps de calcul"
+	plt.tight_layout()
+	plt.title("Analyse du temps de calcul en fonction du nombre de sommets n")
+	plt.xlabel("n") # nombre de sommets du graphe G
+	plt.ylabel("t(n)") # temps de calcul en fonction du nombre de sommets du graphe G
+	plt.plot(abscisse_n, ordonnee_tType4, label = "type VI : plus court chemin")
+	plt.plot(abscisse_n, ordonnee_tType4_LP, label = "type VI LP : LP plus court chemin")
 	plt.legend()
 	
 	# Sauvegarde du tracé
@@ -310,7 +332,10 @@ def plotPerformances_m(n_fixe, minM, maxM, interval_dates_fixe, nbTests, nbItera
 			global_tEnd = time.time()
 
 			type4_LP_tStart = time.time()
-			p.shortest_LP()
+			try:
+				p.shortest_LP()
+			except:
+				None
 			type4_LP_tEnd = time.time()
 
 
@@ -361,6 +386,24 @@ def plotPerformances_m(n_fixe, minM, maxM, interval_dates_fixe, nbTests, nbItera
 	
 	plt.show()
 
+	#Affichage graphique
+	plt.figure()
+	plt.suptitle("Performances", size = 20, color = 'red')
+	plt.rc('xtick', labelsize=10)    # fontsize of the tick labels
+	plt.grid(True)
+
+	plt.title("Analyse du temps de calcul en fonction du nombre d'arcs m")
+	plt.xlabel("m") # nombre d'arcs du graphe G
+	plt.ylabel("t(m)") # temps de calcul en fonction du nombre d'arcs du graphe G
+	plt.plot(abscisse_m, ordonnee_tType4, label = "type VI : plus court chemin")
+	plt.plot(abscisse_m, ordonnee_tType4_LP, label = "type VI LP : LP plus court chemin")
+
+
+	# Sauvegarde du tracé
+	if (save):
+		plt.savefig("TestsResults/TestsResults/m/" + str(datetime.date.today()) + str(datetime.datetime.now().strftime("_%H_%M_%S")) + ".jpeg", transparent = True)
+	
+	plt.show()
 
 # Méthode permettant d'afficher un graphique de comparaison des performances ("temps de calcul" et "qualité des Solutions") de l'algorithme choisi
 def plotPerformances_d(n_fixe, m_fixe, maxInterval_dates, nbTests, nbIterations, verbose=False, save = False):
@@ -424,7 +467,10 @@ def plotPerformances_d(n_fixe, m_fixe, maxInterval_dates, nbTests, nbIterations,
 			global_tEnd = time.time()
 
 			type4_LP_tStart = time.time()
-			p.shortest_LP()
+			try:
+				p.shortest_LP()
+			except:
+				None
 			type4_LP_tEnd = time.time()
 
 
@@ -475,6 +521,23 @@ def plotPerformances_d(n_fixe, m_fixe, maxInterval_dates, nbTests, nbIterations,
 	
 	plt.show()
 
+	#Affichage graphique
+	plt.figure()
+	plt.suptitle("Performances", size = 20, color = 'red')
+	plt.rc('xtick', labelsize=10)    # fontsize of the tick labels
+	plt.grid(True)
+
+	plt.title("Analyse du temps de calcul en fonction de l'intervalle de dates choisies interval_dates")
+	plt.xlabel("interval_dates") # nombre de sommets du graphe G
+	plt.ylabel("t(interval_dates)") # temps de calcul en fonction de l'interval de dates choisies du graphe G
+	plt.plot(abscisse_d, ordonnee_tType4, label = "type VI : plus court chemin")
+	plt.plot(abscisse_d, ordonnee_tType4_LP, label = "type VI LP : plus court chemin")
+
+	# Sauvegarde du tracé
+	if (save):
+		plt.savefig("TestsResults/TestResults_interval_dates/" + str(datetime.date.today()) + str(datetime.datetime.now().strftime("_%H_%M_%S")) + ".jpeg", transparent = True)
+	
+	plt.show()
 
 def performances():
 
@@ -489,26 +552,25 @@ def performances():
 		# 	interval = interval_fixe ou maxInterval_dates
 
 		# Parametres pour plotPerformances_n
-		minN = 50
-		maxN = 70
+		minN = 50 #100
+		maxN = 70 #300
 		
 		# Parametres pour plotPerformances_m
 		minM = 100
 		maxM = 300
 		
 		# Parametres pour plotPerformances_d
-		maxInterval_dates = [1,30]
+		maxInterval_dates = [1, 50]
 
-		n_fixe = 10
-		m_fixe = 350
+		n_fixe = 50
+		m_fixe = 210 #900
 		interval_dates_fixe = [1, 100]
 
 
-		plotPerformances_n(minN, maxN, m_fixe, interval_dates_fixe, nbTests, nbIterations, verbose, save)
-		# #plotPerformances_m(n_fixe, minM, maxM, interval_dates_fixe, nbTests, nbIterations, verbose, save)
-		# #plotPerformances_d(n_fixe, m_fixe, maxInterval_dates, nbTests, nbIterations, verbose, save)
+		# plotPerformances_n(minN, maxN, m_fixe, interval_dates_fixe, nbTests, nbIterations, verbose, save)
+		plotPerformances_m(n_fixe, minM, maxM, interval_dates_fixe, nbTests, nbIterations, verbose, save)
+		# plotPerformances_d(n_fixe, m_fixe, maxInterval_dates, nbTests, nbIterations, verbose, save)
 
-	# print("TESTTTTTTTTTTTTT")
 	# mg = generateGraph(70, 210)
 
 	# try:
