@@ -1,15 +1,9 @@
-# Projet_MOGPL
-MOGPL - Modélisation, Optimisation, Graphes, Programmation Linéaire
-
-Multi-graphes orientés pondérés par le temps
+Multigraph algorithms to find the shortest, fastest, earliest and latest flight combinations in order to arrive at a specified destination within a given time interval (variants of BFS and Dijkstra, linear program for Gurobi). Multigraph generator for testing purposes.
 
 Lien Google Drive pour le rapport : https://drive.google.com/drive/folders/1ffEkrCCSTVz6hUQp-NSnf2f1dNkr2yCw?usp=sharing
 
 
 
-Rendu : 6 décembre 2021
-
-Soutenance : 17 décembre 2021
 
 ---
 
